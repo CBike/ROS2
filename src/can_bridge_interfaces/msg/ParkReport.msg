@@ -1,0 +1,2 @@
+uint8 parking_actual
+uint8 park_flt

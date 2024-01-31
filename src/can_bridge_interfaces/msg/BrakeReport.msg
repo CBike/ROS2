@@ -1,0 +1,4 @@
+uint8 brake_en_state
+uint8 brake_flt1
+uint8 brake_flt2
+float32 brake_pedal_actual

@@ -1,0 +1,4 @@
+uint8 throttle_en_state
+uint8 throttle_flt1
+uint8 throttle_flt2
+float32 throttle_pedal_actual

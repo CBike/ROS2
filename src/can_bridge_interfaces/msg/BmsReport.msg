@@ -1,0 +1,3 @@
+float32 battery_voltage
+float32 battery_current
+uint8 battery_soc

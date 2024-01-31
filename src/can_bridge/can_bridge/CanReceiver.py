@@ -6,6 +6,10 @@ import struct
 
 class CanReceiver:
     def __init__(self, channel='can0'):
+        """
+        TODO : Code that runs a shell that opens the can interface and Code is needed to automatically find the can interface
+        and pass it to the 'channel' parameter of the can.interface.Bus method.
+        """
         self.channel = channel
         self.bus = can.interface.Bus(channel=self.channel, bustype='socketcan')
         self.running = False
@@ -40,6 +44,7 @@ class CanReceiver:
                     # Assuming LAW data has an extended ID and DLC of 8 bytes
                     self.process_can_date(can_id, data)
             except can.CanError as e:
+                # TODO Can Exception handling
                 return f'can.CanError exception occurred: {e}'
 
     def process_can_date(self, can_id, data):

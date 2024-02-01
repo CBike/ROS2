@@ -7,13 +7,18 @@ import struct
 class CanReceiver:
     def __init__(self, channel='can0'):
         """
-        TODO : Code that runs a shell that opens the can interface and Code is needed to automatically find the can interface
-        and pass it to the 'channel' parameter of the can.interface.Bus method.
+        Initializes a CanReceiver object.
+
+        Parameters:
+        - channel (str): CAN channel name, default is 'can0'.
+
+        TODO : Code that runs a shell that opens the can interface and Code is needed to automatically find the can interface and pass it to the 'channel' parameter of the can.interface.Bus method.
         """
         self.channel = channel
         self.bus = can.interface.Bus(channel=self.channel, bustype='socketcan')
         self.running = False
 
+        # Queue for storing received messages of different types
         self.throttle_report_message_queue = queue.Queue()
         self.brake_report_message_queue = queue.Queue()
         self.steer_report_message_queue = queue.Queue()
@@ -23,17 +28,29 @@ class CanReceiver:
         self.wheel_speed_report_message_queue = queue.Queue()
         self.bms_report_message_queue = queue.Queue()
 
+        # Thread for receiving CAN message in the background
         self.receive_thread = threading.Thread(target=self.receive_data)
 
     def start(self):
+        """
+        Starts the background thread for receiving CAN message.
+        """
+
         self.running = True
         self.receive_thread.start()
 
     def stop(self):
+        """
+        Stops the background thread for receiving CAN message.
+        """
+
         self.running = False
         self.receive_thread.join()
 
     def receive_data(self):
+        """
+        Continuously receives CAN message and processes them.
+        """
         while self.running:
             try:
                 message = self.bus.recv()
@@ -43,11 +60,20 @@ class CanReceiver:
                 if message.dlc == 8:
                     # Assuming LAW data has an extended ID and DLC of 8 bytes
                     self.process_can_date(can_id, data)
-            except can.CanError as e:
+            except can.CanError as _:
                 # TODO Can Exception handling
-                return f'can.CanError exception occurred: {e}'
+                pass
 
     def process_can_date(self, can_id, data):
+        """
+        Processes received CAN message based on their ID.
+
+        Parameters:
+        - can_id (int): CAN message ID.
+        - data (bytearray): Raw data of the CAN message.
+        """
+        # Each CAN ID corresponds to a specific type of report, and data is parsed accordingly
+
         # throttle Report
         if can_id == 0x500:
             parsed_data = CanReceiver.parsing_can_data_throttle_report(data)
@@ -90,6 +116,7 @@ class CanReceiver:
         else:
             # TODO:  Exception handling for undefined ID values must be added.
             pass
+
 
     def get_throttle_report(self):
         if not self.throttle_report_message_queue.empty():

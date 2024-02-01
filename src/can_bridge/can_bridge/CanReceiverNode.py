@@ -8,8 +8,10 @@ import rclpy
 
 class CanReceiverNode(Node):
     """
-      TODO : check publisher queue size
-      """
+    Node responsible for receiving CAN messages and publishing them as ROS2 messages.
+
+    TODO: Check publisher queue size.
+    """
     def __init__(self):
         super().__init__('CanReceiverNode')
         self.can_channel = 'can0'
@@ -35,6 +37,9 @@ class CanReceiverNode(Node):
         self.bms_report_timer = self.create_timer(0.02, self.pub_bms_report)
 
     def pub_throttle_report(self):
+        """
+        Publishes ThrottleReport messages based on parsed CAN data.
+        """
         get_msg = self.can_receiver.get_throttle_report()
         if get_msg is not None:
             pub_msg = ThrottleReport()
@@ -47,6 +52,9 @@ class CanReceiverNode(Node):
             pass
 
     def pub_brake_report(self):
+        """
+         Publishes BrakeReport messages based on parsed CAN data.
+         """
         get_msg = self.can_receiver.get_brake_report()
         if get_msg is not None:
             pub_msg = BrakeReport()
@@ -60,8 +68,9 @@ class CanReceiverNode(Node):
             pass
 
     def pub_steer_report(self):
-        """TODO:
-        Check the steer_angle_speed_actual value : 255
+        """
+        Publishes SteerReport messages based on parsed CAN data.
+        TODO:Check the steer_angle_speed_actual value : 255
         """
         get_msg = self.can_receiver.get_steer_report()
         if get_msg is not None:
@@ -78,6 +87,9 @@ class CanReceiverNode(Node):
             pass
 
     def pub_gear_report(self):
+        """
+        Publishes GearReport messages based on parsed CAN data.
+        """
         get_msg = self.can_receiver.get_gear_report()
         if get_msg is not None:
             pub_msg = GearReport()
@@ -86,6 +98,9 @@ class CanReceiverNode(Node):
             self.gear_report_publisher.publish(pub_msg)
 
     def pub_park_report(self):
+        """
+        Publishes ParkReport messages based on parsed CAN data.
+        """
         get_msg = self.can_receiver.get_park_report()
         if get_msg is not None:
             pub_msg = ParkReport()
@@ -94,7 +109,9 @@ class CanReceiverNode(Node):
             self.park_report_publisher.publish(pub_msg)
 
     def pub_vcu_report(self):
-
+        """
+        Publishes VcuReport messages based on parsed CAN data.
+        """
         get_msg = self.can_receiver.get_vcu_report()
         if get_msg is not None:
             pub_msg = VcuReport()
@@ -118,6 +135,9 @@ class CanReceiverNode(Node):
             pass
 
     def pub_wheel_speed_report(self):
+        """
+        Publishes WheelSpeedReport messages based on parsed CAN data.
+        """
         get_msg = self.can_receiver.get_wheel_speed_report()
         if get_msg is not None:
             pub_msg = WheelSpeedReport()
@@ -128,6 +148,10 @@ class CanReceiverNode(Node):
             self.wheel_speed_report_publisher.publish(pub_msg)
 
     def pub_bms_report(self):
+        """
+        Publishes BmsReport messages based on parsed CAN data.
+
+        """
         get_msg = self.can_receiver.get_bms_report()
         if get_msg is not None:
             pub_msg = BmsReport()

@@ -35,7 +35,6 @@ class CanReceiver:
         """
         Starts the background thread for receiving CAN message.
         """
-
         self.running = True
         self.receive_thread.start()
 
@@ -43,7 +42,6 @@ class CanReceiver:
         """
         Stops the background thread for receiving CAN message.
         """
-
         self.running = False
         self.receive_thread.join()
 

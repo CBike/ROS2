@@ -19,14 +19,16 @@ class CanReceiver:
         self.running = False
 
         # Queue for storing received messages of different types
-        self.throttle_report_message_queue = queue.Queue()
-        self.brake_report_message_queue = queue.Queue()
-        self.steer_report_message_queue = queue.Queue()
-        self.gear_report_message_queue = queue.Queue()
-        self.park_report_message_queue = queue.Queue()
-        self.vcu_report_message_queue = queue.Queue()
-        self.wheel_speed_report_message_queue = queue.Queue()
-        self.bms_report_message_queue = queue.Queue()
+        self.report_message_queues = {
+            'throttle': queue.Queue(),
+            'brake': queue.Queue(),
+            'steer': queue.Queue(),
+            'gear': queue.Queue(),
+            'park': queue.Queue(),
+            'vcu': queue.Queue(),
+            'wheel_speed': queue.Queue(),
+            'bms': queue.Queue(),
+        }
 
         # Thread for receiving CAN message in the background
         self.receive_thread = threading.Thread(target=self.receive_data)
@@ -57,12 +59,12 @@ class CanReceiver:
                 # TODO: Fields other than the dlc field of the can message frame must also be checked.
                 if message.dlc == 8:
                     # Assuming LAW data has an extended ID and DLC of 8 bytes
-                    self.process_can_date(can_id, data)
+                    self.process_can_data(can_id, data)
             except can.CanError as _:
                 # TODO Can Exception handling
                 pass
 
-    def process_can_date(self, can_id, data):
+    def process_can_data(self, can_id, data):
         """
         Processes received CAN message based on their ID.
 
@@ -70,97 +72,48 @@ class CanReceiver:
         - can_id (int): CAN message ID.
         - data (bytearray): Raw data of the CAN message.
         """
-        # Each CAN ID corresponds to a specific type of report, and data is parsed accordingly
-
-        # throttle Report
-        if can_id == 0x500:
-            parsed_data = CanReceiver.parsing_can_data_throttle_report(data)
-            self.throttle_report_message_queue.put(parsed_data)
-        # Brake Report
-        elif can_id == 0x501:
-            parsed_data = CanReceiver.parsing_can_data_brake_report(data)
-            self.brake_report_message_queue.put(parsed_data)
-
-        # Steering Report
-        elif can_id == 0x502:
-            parsed_data = CanReceiver.parsing_can_data_steering_report(data)
-            self.steer_report_message_queue.put(parsed_data)
-
-        # Gear Report
-        elif can_id == 0x503:
-            parsed_data = CanReceiver.parsing_can_data_gear_report(data)
-            self.gear_report_message_queue.put(parsed_data)
-
-        # Park Report
-        elif can_id == 0x504:
-            parsed_data = CanReceiver.parsing_can_data_park_report(data)
-            self.park_report_message_queue.put(parsed_data)
-
-        # VCU Report
-        elif can_id == 0x505:
-            parsed_data = CanReceiver.parsing_can_data_vcu_report(data)
-            self.vcu_report_message_queue.put(parsed_data)
-
-        # WheelSpeed Report
-        elif can_id == 0x506:
-            parsed_data = CanReceiver.parsing_can_data_wheel_speed_report(data)
-            self.wheel_speed_report_message_queue.put(parsed_data)
-
-        # BMS Report
-        elif can_id == 0x512:
-            parsed_data = CanReceiver.parsing_can_data_bms_report(data)
-            self.bms_report_message_queue.put(parsed_data)
-
+        report_type = self.get_report_type(can_id)
+        if report_type:
+            parsed_data = getattr(self, f'parsing_can_data_{report_type}_report')(data)
+            self.report_message_queues[report_type].put(parsed_data)
         else:
-            # TODO:  Exception handling for undefined ID values must be added.
+            # TODO: Exception handling for undefined ID values must be added.
             pass
 
+    def get_report_type(self, can_id):
+        """
+        Maps CAN ID to report types.
 
-    def get_throttle_report(self):
-        if not self.throttle_report_message_queue.empty():
-            return self.throttle_report_message_queue.get()
-        else:
-            return None
+        Parameters:
+        - can_id (int): CAN message ID.
 
-    def get_brake_report(self):
-        if not self.brake_report_message_queue.empty():
-            return self.brake_report_message_queue.get()
-        else:
-            return None
+        Returns:
+        - str: Report type or None if not found.
+        """
+        report_types = {
+            0x500: 'throttle',
+            0x501: 'brake',
+            0x502: 'steer',
+            0x503: 'gear',
+            0x504: 'park',
+            0x505: 'vcu',
+            0x506: 'wheel_speed',
+            0x512: 'bms',
+        }
+        return report_types.get(can_id)
 
-    def get_steer_report(self):
-        if not self.steer_report_message_queue.empty():
-            return self.steer_report_message_queue.get()
-        else:
-            return None
+    def get_report(self, report_type):
+        """
+        Gets the latest report of a specific type.
 
-    def get_gear_report(self):
-        if not self.steer_report_message_queue.empty():
-            return self.gear_report_message_queue.get()
-        else:
-            return None
+        Parameters:
+        - report_type (str): Type of report.
 
-    def get_park_report(self):
-        if not self.park_report_message_queue.empty():
-            return self.park_report_message_queue.get()
-        else:
-            return None
-
-    def get_vcu_report(self):
-        if not self.vcu_report_message_queue.empty():
-            return self.vcu_report_message_queue.get()
-        else:
-            return None
-
-    def get_wheel_speed_report(self):
-        if not self.wheel_speed_report_message_queue.empty():
-            return self.wheel_speed_report_message_queue.get()
-        else:
-            return None
-
-    def get_bms_report(self):
-        if not self.bms_report_message_queue.empty():
-            return self.bms_report_message_queue.get()
+        Returns:
+        - dict: Parsed report data or None if the queue is empty.
+        """
+        if report_type in self.report_message_queues and not self.report_message_queues[report_type].empty():
+            return self.report_message_queues[report_type].get()
         else:
             return None
 
@@ -355,7 +308,6 @@ class CanReceiver:
 
     @staticmethod
     def parsing_can_data_wheel_speed_report(data):
-
         def is_valid_fl(value):
             return 0 <= value <= 65.535
 

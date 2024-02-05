@@ -40,7 +40,7 @@ class CanReceiverNode(Node):
         """
         Publishes ThrottleReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_throttle_report()
+        get_msg = self.can_receiver.get_report('throttle')
         if get_msg is not None:
             pub_msg = ThrottleReport()
             pub_msg.throttle_en_state = get_msg['throttle_en_state']
@@ -55,7 +55,7 @@ class CanReceiverNode(Node):
         """
          Publishes BrakeReport messages based on parsed CAN data.
          """
-        get_msg = self.can_receiver.get_brake_report()
+        get_msg = self.can_receiver.get_report('brake')
         if get_msg is not None:
             pub_msg = BrakeReport()
             pub_msg.brake_en_state = get_msg['brake_en_state']
@@ -72,7 +72,7 @@ class CanReceiverNode(Node):
         Publishes SteerReport messages based on parsed CAN data.
         TODO:Check the steer_angle_speed_actual value : 255
         """
-        get_msg = self.can_receiver.get_steer_report()
+        get_msg = self.can_receiver.get_report('steer')
         if get_msg is not None:
             pub_msg = SteerReport()
             pub_msg.steer_en_state = get_msg['steer_en_state']
@@ -90,7 +90,7 @@ class CanReceiverNode(Node):
         """
         Publishes GearReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_gear_report()
+        get_msg = self.can_receiver.get_report('gear')
         if get_msg is not None:
             pub_msg = GearReport()
             pub_msg.gear_actual = get_msg['gear_actual']
@@ -101,7 +101,7 @@ class CanReceiverNode(Node):
         """
         Publishes ParkReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_park_report()
+        get_msg = self.can_receiver.get_report('park')
         if get_msg is not None:
             pub_msg = ParkReport()
             pub_msg.parking_actual = get_msg['parking_actual']
@@ -112,7 +112,7 @@ class CanReceiverNode(Node):
         """
         Publishes VcuReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_vcu_report()
+        get_msg = self.can_receiver.get_report('vcu')
         if get_msg is not None:
             pub_msg = VcuReport()
             pub_msg.header = Header()
@@ -138,7 +138,7 @@ class CanReceiverNode(Node):
         """
         Publishes WheelSpeedReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_wheel_speed_report()
+        get_msg = self.can_receiver.get_report('wheel_speed')
         if get_msg is not None:
             pub_msg = WheelSpeedReport()
             pub_msg.fl = get_msg['fl']
@@ -152,7 +152,7 @@ class CanReceiverNode(Node):
         Publishes BmsReport messages based on parsed CAN data.
 
         """
-        get_msg = self.can_receiver.get_bms_report()
+        get_msg = self.can_receiver.get_report('bms')
         if get_msg is not None:
             pub_msg = BmsReport()
             pub_msg.battery_voltage = get_msg['battery_voltage']

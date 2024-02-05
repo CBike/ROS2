@@ -173,7 +173,7 @@ class CanReceiver:
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_steering_report(data):
+    def parsing_can_data_steer_report(data):
 
         def is_valid_steer_en_state(value):
             return 0 <= value <= 3

@@ -1,0 +1,5 @@
+uint8 brake_en_ctrl
+uint8 aeb_en_ctrl
+float32 brake_dec
+float32 brake_pedal_target
+uint8 checksum_101

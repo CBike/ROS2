@@ -18,7 +18,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SteerReport.msg"
   "msg/ThrottleReport.msg"
   "msg/VcuReport.msg"
-  "msg/WheelSpeedReport.msg"
+  "msg/ThrottleCommand.msg"
+  "msg/BrakeCommand.msg"
+  "msg/GearCommand.msg"
+  "msg/SteerCommand.msg"
+  "msg/VehicleModeCommand.msg"
+
   DEPENDENCIES std_msgs
  )
 

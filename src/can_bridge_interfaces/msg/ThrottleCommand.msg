@@ -1,0 +1,5 @@
+uint8 throttle_en_ctrl
+float32 throttle_en_ctrl
+float32 throttle_pedal_target
+float32 vel_target
+uint8 checksum_100

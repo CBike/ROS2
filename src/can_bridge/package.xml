@@ -3,8 +3,8 @@
 <package format="3">
   <name>can_bridge</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="c-bike@naver.com">avg</maintainer>
+  <description>CAN Report / Command bridge</description>
+  <maintainer email="yhjeon@avgenius.kr">YANG HO JEON</maintainer>
   <license>Apache--2.0</license>
 
   <depend>std_msgs</depend>

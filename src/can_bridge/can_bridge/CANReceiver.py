@@ -361,5 +361,5 @@ class CANReceiver:
 
 
 if __name__ == '__main__':
-    can_listener = CanReceiver('can0')
+    can_listener = CANReceiver('can0')
     can_listener.start()

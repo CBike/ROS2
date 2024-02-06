@@ -56,12 +56,16 @@ class CanReceiver:
                 message = self.bus.recv()
                 can_id = message.arbitration_id
                 data = message.data
-                # TODO: Fields other than the dlc field of the can message frame must also be checked.
-                if message.dlc == 8:
-                    # Assuming LAW data has an extended ID and DLC of 8 bytes
+
+                if message.is_error_frame:
+                    pass
+                # TODO : If the message contains an error frame, additional code for data processing is required.
+                if message.is_remote_frame:
+                    pass
+                # TODO : Requires processing when the message contains a remote request frame
+                if not message.is_extended_id and message.dlc == 8 and not message.is_remote_frame:
                     self.process_can_data(can_id, data)
             except can.CanError as _:
-                # TODO Can Exception handling
                 pass
 
     def process_can_data(self, can_id, data):

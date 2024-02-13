@@ -1,2 +1,2 @@
-uint8 parking_actual
-uint8 park_flt
+uint8 parking_actual 0
+uint8 park_flt 0

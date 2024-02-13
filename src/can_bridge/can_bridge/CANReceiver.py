@@ -135,7 +135,7 @@ class CANReceiver:
         def is_valid_throttle_pedal_actual(value):
             return 0 <= value <= 100
 
-        throttle_en_state = data[0] & 0b00000011
+        throttle_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
         throttle_flt1 = struct.unpack('>B', data[1:2])[0]
         throttle_flt2 = struct.unpack('>B', data[2:3])[0]
         throttle_pedal_actual = struct.unpack('>B', data[3:4])[0] * 0.1
@@ -163,7 +163,7 @@ class CANReceiver:
         def is_valid_brake_pedal_actual(value):
             return 0 <= value <= 100
 
-        brake_en_state = data[0] & 0b00000011
+        brake_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
         brake_flt1 = struct.unpack('>B', data[1:2])[0]
         brake_flt2 = struct.unpack('>B', data[2:3])[0]
         brake_pedal_actual = struct.unpack('>B', data[3:4])[0] * 0.1
@@ -194,7 +194,7 @@ class CANReceiver:
         def is_valid_steer_angle_speed_actual(value):
             return 0 <= value <= 255
 
-        steer_en_state = data[0] & 0b00000011
+        steer_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
         steer_flt1 = struct.unpack('>B', data[1:2])[0]
         steer_flt2 = struct.unpack('>B', data[2:3])[0]
         steer_angle_actual = struct.unpack('>H', data[3:5])[0] - 500
@@ -218,7 +218,7 @@ class CANReceiver:
         def is_valid_gear_flt(value):
             return 0 <= value <= 1
 
-        gear_actual = data[0] & 0b00000111
+        gear_actual = struct.unpack('>B', data[0:1])[0] & 0b00000111
         gear_flt = struct.unpack('>B', data[1:2])[0]
 
         parsed_data = dict()
@@ -235,7 +235,7 @@ class CANReceiver:
         def is_valid_park_flt(value):
             return 0 <= value <= 1
 
-        parking_actual = data[0] & 0b00000001
+        parking_actual = struct.unpack('>B', data[0:1])[0] & 0b00000001
         park_flt = struct.unpack('>B', data[1:2])[0]
 
         parsed_data = dict()
@@ -280,20 +280,21 @@ class CANReceiver:
         def is_valid_turn_light_actual(value):
             return 0 <= value <= 4
 
-        steer_mode_stst = data[1] & 0b00000111
-        brake_light_actual = 1 if ((data[1] & 0b00001000) > 0) else 0
+        steer_mode_stst = struct.unpack('>B', data[1:2])[0] & 0b00000111
+
+        brake_light_actual = 1 if ((struct.unpack('>B', data[1:2])[0] & 0b00001000) > 0) else 0
 
         acc = ((struct.unpack('>h', data[1:3])[0] & 0b1111000000000000) >> 12 |
                struct.unpack('>h', data[1:3])[0] & 0b0000000111111111) * 0.001
 
         speed = struct.unpack('>h', data[3:5])[0] * 0.001
-        aeb_state = data[5] & 0b00000001
-        front_crash_state = data[5] & 0b00000010
-        back_crash_state = data[5] & 0b00000100
-        vehicle_mode_state = data[5] & 0b00011000
-        driver_mode_state = data[5] & 0b1110000
+        aeb_state = struct.unpack('>B', data[5:6])[0] & 0b00000001
+        front_crash_state = struct.unpack('>B', data[5:6])[0] & 0b00000010
+        back_crash_state = struct.unpack('>B', data[5:6])[0] & 0b00000100
+        vehicle_mode_state = struct.unpack('>B', data[5:6])[0] & 0b00011000
+        driver_mode_state = struct.unpack('>B', data[5:6])[0] & 0b1110000
         chassis_errcode = struct.unpack('>B', data[6:7])[0]
-        turn_light_actual = data[7] & 0b00000011
+        turn_light_actual = struct.unpack('>B', data[7:8])[0] & 0b00000011
 
         parsed_data = dict()
         parsed_data['steer_mode_stst'] = steer_mode_stst if is_valid_steer_mode_stst(steer_mode_stst) else 0

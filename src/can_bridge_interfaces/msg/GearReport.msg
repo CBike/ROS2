@@ -1,2 +1,2 @@
-uint8 gear_actual
-uint8 gear_flt
+uint8 gear_actual 0
+uint8 gear_flt 0

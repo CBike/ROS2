@@ -15,27 +15,39 @@ class CANCommandNode(Node):
         self.can_channel = 'can0'
         self.can_sender = CANSender(self.can_channel)
 
-        self.sub_throttle_cmd = self.create_subscription(ThrottleCommand, 'actuator/Throttle_Command',
+        self.sub_throttle_cmd = self.create_subscription(ThrottleCommand, 'operator/actuator/Throttle_Command',
                                                          self.dispatch_command, 10)
-        self.sub_brake_cmd = self.create_subscription(BrakeCommand, 'actuator/Brake_Command',
+
+        self.sub_brake_cmd = self.create_subscription(BrakeCommand, 'operator/actuator/Brake_Command',
                                                       self.dispatch_command, 10)
-        self.sub_steer_cmd = self.create_subscription(SteerCommand, 'actuator/Steer_Command',
+
+        self.sub_steer_cmd = self.create_subscription(SteerCommand, 'operator/actuator/Steer_Command',
                                                       self.dispatch_command, 10)
-        self.sub_gear_cmd = self.create_subscription(GearCommand, 'actuator/Gear_Command',
+
+        self.sub_gear_cmd = self.create_subscription(GearCommand, 'operator/actuator/Gear_Command',
                                                      self.dispatch_command, 10)
-        self.sub_park_cmd = self.create_subscription(ParkCommand, 'actuator/Park_Command',
+
+        self.sub_park_cmd = self.create_subscription(ParkCommand, 'operator/actuator/Park_Command',
                                                      self.dispatch_command, 10)
-        self.sub_vmc_cmd = self.create_subscription(VehicleModeCommand, 'actuator/Vehicle_Mode_Command',
+
+        self.sub_vmc_cmd = self.create_subscription(VehicleModeCommand, 'operator/actuator/Vehicle_Mode_Command',
                                                     self.dispatch_command, 10)
 
     def dispatch_command(self, msg):
         empty_array = bytearray(8)
         if isinstance(msg, ThrottleCommand):
-            empty_array[0:1] = CANCommandNode.generate_byte_array()
-            empty_array[1:3] = CANCommandNode.generate_byte_array()
-            empty_array[3:5] = CANCommandNode.generate_byte_array()
-            empty_array[5:7] = CANCommandNode.generate_byte_array()
-            empty_array[7:8] = CANCommandNode.generate_byte_array()
+            command_array = empty_array
+            command_array[0:1] = CANCommandNode.generate_byte_array(int(msg.throttle_en_ctrl), 0,0)
+            command_array[1:3] = CANCommandNode.generate_byte_array(int(msg.throttle_acc/0.01), 14, 23)
+            command_array[3:5] = CANCommandNode.generate_byte_array(int(msg.throttle_pedal_target/0.1), 24, 39)
+            vel_target1 = CANCommandNode.split_data(int(msg.vel_target/0.01), 0, 7)
+            vel_target2 = CANCommandNode.split_data(int(msg.vel_target/0.01), 7, 10)
+            command_array[5:6] = CANCommandNode.generate_byte_array(vel_target1, 40, 47)
+            command_array[6:7] = CANCommandNode.generate_byte_array(vel_target2, 52, 55)
+            # TODO : Do Checksum check
+            command_array[7:8] = CANCommandNode.generate_byte_array(int(msg.checksum_100), 56, 63)
+            self.can_sender.send(0x100, command_array)
+
         elif isinstance(msg, BrakeCommand):
             pass
         elif isinstance(msg, SteerCommand):
@@ -46,7 +58,6 @@ class CANCommandNode(Node):
             pass
         elif isinstance(msg, VehicleModeCommand):
             pass
-
         else:
             pass
 

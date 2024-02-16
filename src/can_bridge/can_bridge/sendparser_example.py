@@ -21,7 +21,7 @@ def split_data(data: int, start_bit: int, end_bit: int) -> int:
     return extracted_data
 
 
-def int_to_bits(n):
+def int_to_bits(n: int) -> str:
     """Converts an integer to its binary representation as a string.
 
     Args:
@@ -137,7 +137,6 @@ def main():
     result = extract_bits(byte_array, start_bit, end_bit)
     print(bytearray_to_bits(byte_array))
     print("byte_array:", byte_array)
-
     print("Result:", result)
 
 

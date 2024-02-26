@@ -12,9 +12,9 @@ int8 steer_mode_sts 0
 # [] [0|3] 0-manual_remote 1-auto 2-emergency 3-standby
 int8 vehicle_mode_state 0
 # [] [0|1] 0-no_event 1-crash_event
-int8 frontcrash_state 0
+int8 front_crash_state 0
 # [] [0|1] 0-no_event 1-crash_event
-int8 backcrash_state 0
+int8 back_crash_state 0
 # [] [0|1] 0-inactive 1-active
 int8 aeb_state 0
 # [m/s^2] [-10|10]

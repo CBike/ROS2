@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>pix_vehicle_interface</name>
+  <version>0.0.0</version>
+  <description>pix vehicle interface by CAN</description>
+  <maintainer email="yhjeon@avgenius.kr">JEON YANG HO</maintainer>
+  <license>TODO: License declaration</license>
+  <depend>std_msgs</depend>
+  <depend>pix_vehicle_msgs/msg/BmsReport</depend>
+  <depend>pix_vehicle_msgs/msg/BrakeReport</depend>
+  <depend>pix_vehicle_msgs/msg/GearReport</depend>
+  <depend>pix_vehicle_msgs/msg/ParkReport</depend>
+  <depend>pix_vehicle_msgs/msg/SteerReport</depend>
+  <depend>pix_vehicle_msgs/msg/ThrottleReport</depend>
+  <depend>pix_vehicle_msgs/msg/VcuReport</depend>
+  <depend>pix_vehicle_msgs/msg/WheelSpeedReport</depend>
+  <export>
+    <build_type>ament_python</build_type>
+    <pythonpath>${prefix}/pix_vehicle_interface</pythonpath>
+  </export>
+</package>

@@ -6,11 +6,6 @@ class CANSender:
         self.channel = channel
         self.bus = can.interface.Bus(channel=channel, bustype='socketcan')
 
-
-    def process_command(self,message):
-        pass
-
-
     def send(self, can_id, data, extended=False):
         message = can.Message(
             arbitration_id=can_id,
@@ -18,9 +13,10 @@ class CANSender:
             is_extended_id=extended,
         )
         try:
-            print(f"Sent CAN message: ID={can_id}, Data={data}")
+            self.bus.send(message)
+            return True
         except can.CanError:
-            print("Error sending CAN message")
+            return False
 
     def close(self):
         self.bus.shutdown()

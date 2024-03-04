@@ -1,6 +1,6 @@
 from rclpy.node import Node
 from std_msgs.msg import Header
-from can_receiver import CANReceiver
+from can_utils.can_receiver import CANReceiver
 from pix_vehicle_msgs.msg import (BmsReport, BrakeReport, GearReport, ParkReport, SteerReport,
                                  ThrottleReport, VcuReport, WheelSpeedReport)
 import rclpy

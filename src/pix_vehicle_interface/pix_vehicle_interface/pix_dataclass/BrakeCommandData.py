@@ -34,7 +34,7 @@ class BrakeCommandData:
         return getattr(self, field_name)
 
     def add_checksum(self):
-        if self._checksum_101 >= 255 or self._checksum_101 < 0:
+        if self._checksum_101 >= 255:
             self._checksum_101 = 0
         self._checksum_101 += 1
 

@@ -33,12 +33,13 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
             # Iterate through each bit in the byte
             for bit_offset in range(8):
                 # Calculate the bit index in the byte array
-                current_bit = byte_index * 8 + (7 - bit_offset)
+                # 인덱스 0번 부터
+                current_bit = byte_index * 8 + bit_offset
 
                 # Check if the current bit falls within the specified range
                 if start_bit <= current_bit <= end_bit:
                     # Extract the bit value from the data and set it in the byte
-                    bit_value = (data >> (end_bit - current_bit)) & 1
+                    bit_value = (data >> (current_bit - start_bit)) & 1
                     byte |= bit_value << bit_offset
 
             # Store the byte in the byte array
@@ -134,3 +135,10 @@ def int_to_bits(n: int) -> str:
         str: A binary string representing the integer, padded with zeros to ensure a length of 8.
     """
     return bin(n)[2:].zfill(8)
+
+if __name__ == "__main__":
+    byte_array = bytearray(8)
+    byte_array[0] = 0x80
+    byte_array[1] = 0x80
+    print(extract_bits(byte_array, 0, 0))
+    print(extract_bits(byte_array, 8, 10))

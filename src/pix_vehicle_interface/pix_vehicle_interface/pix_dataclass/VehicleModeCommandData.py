@@ -31,7 +31,7 @@ class VehicleModeCommandData:
         return getattr(self, field_name)
 
     def add_checksum(self):
-        if self._checksum_105 >= 255 or self._checksum_105 < 0:
+        if self._checksum_105 >= 255:
             self._checksum_105 = 0
         self._checksum_105 += 1
 

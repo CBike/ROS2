@@ -29,7 +29,7 @@ class ParkCommandData:
         return getattr(self, field_name)
 
     def add_checksum(self):
-        if self._checksum_104 >= 255 or self._checksum_104 < 0:
+        if self._checksum_104 >= 255:
             self._checksum_104 = 0
         self._checksum_104 += 1
 

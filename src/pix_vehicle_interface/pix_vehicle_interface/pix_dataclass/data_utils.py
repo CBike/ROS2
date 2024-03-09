@@ -21,29 +21,25 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
         data = int(arg[0])
         start_bit = int(arg[1])
         end_bit = int(arg[2])
-
         # Calculate start_byte, start_bit_offset, end_byte, end_bit_offset
         start_byte, start_bit_offset = divmod(start_bit, 8)
         end_byte, end_bit_offset = divmod(end_bit, 8)
-
-        # Fill data bits into the byte array
-        for byte_index in range(start_byte, end_byte + 1):
-            byte = 0
+        for byte_offset in range(start_byte, end_byte + 1):
+            byte_value = 0
 
             # Iterate through each bit in the byte
             for bit_offset in range(8):
                 # Calculate the bit index in the byte array
-                # 인덱스 0번 부터
-                current_bit = byte_index * 8 + bit_offset
+                current_bit = byte_offset * 8 + bit_offset
 
                 # Check if the current bit falls within the specified range
                 if start_bit <= current_bit <= end_bit:
-                    # Extract the bit value from the data and set it in the byte
-                    bit_value = (data >> (current_bit - start_bit)) & 1
-                    byte |= bit_value << bit_offset
+                    # Extract the bit value from the data and set it in the byte_value
+                    bit_value = (data >> bit_offset) & 1
+                    byte_value |= bit_value << bit_offset
 
-            # Store the byte in the byte array
-            byte_array[byte_index] = byte
+            # Store the byte_value in the byte array
+            byte_array[byte_offset] = byte_value
 
     return byte_array
 
@@ -136,9 +132,6 @@ def int_to_bits(n: int) -> str:
     """
     return bin(n)[2:].zfill(8)
 
-if __name__ == "__main__":
-    byte_array = bytearray(8)
-    byte_array[0] = 0x80
-    byte_array[1] = 0x80
-    print(extract_bits(byte_array, 0, 0))
-    print(extract_bits(byte_array, 8, 10))
+
+
+

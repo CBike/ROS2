@@ -45,10 +45,16 @@ class SteeringCommandData:
     def get_bytearray(self):
         steer_en_ctrl = (self.steer_en_ctrl, 0, 0)
         steer_angle_spd = (self.steer_angle_spd, 8, 15)
-        steer_angle_target = ((self.steer_angle_target + 500), 24, 39)
+
+        upper_byte = ((self.steer_angle_target + 500) >> 8) & 0xFF
+        lower_byte = (self.steer_angle_target + 500) & 0xFF
+        steer_angle_target_upper_data = (upper_byte, 24, 31)
+        steer_angle_target_lower_data = (lower_byte, 32, 39)
+
         checksum_102 = (self._checksum_102, 56, 63)
 
-        return generate_byte_array(8, steer_en_ctrl, steer_angle_spd, steer_angle_target, checksum_102)
+        return generate_byte_array(8, steer_en_ctrl, steer_angle_spd, steer_angle_target_upper_data,
+                                   steer_angle_target_lower_data, checksum_102)
 
     @staticmethod
     def validate_steer_en_ctrl(val):
@@ -60,6 +66,6 @@ class SteeringCommandData:
 
     @staticmethod
     def validate_steer_angle_target(val):
-        return -360 <= val <= 360
+        return -500 <= val <= 500
 
 

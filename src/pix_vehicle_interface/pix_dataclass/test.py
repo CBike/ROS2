@@ -1,6 +1,8 @@
 import struct
 
-def generate_byte_array(array_size: int, *args) -> bytearray:
+
+def generate_byte_array(array_size: int, *args: object) -> bytearray:
+
     """Generates a bytearray filled with data extracted from arguments within specified bit ranges.
 
     Args:

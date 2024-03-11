@@ -48,11 +48,17 @@ class BrakeCommandData:
     def get_bytearray(self):
         brake_en_ctrl = (self.brake_en_ctrl, 0, 0)
         aeb_en_ctrl = (self.aeb_en_ctrl, 1, 1)
-        brake_dec = (int(self.brake_dec / 0.01), 22, 31)
-        brake_pedal_target = (int(self.brake_pedal_target / 0.1), 32, 47)
+
+        brake_dec_upper_byte = (((int(self.brake_dec / 0.01) >> 8) & 0xFF), 8, 15)
+        brake_dec_lower_byte = ((int(self.brake_dec / 0.01) & 0b11), 22, 23)
+
+        brake_pedal_target_upper_byte = (((int(self.brake_pedal_target / 0.1) >> 8) & 0xFF), 24, 31)
+        brake_pedal_target_lower_byte = ((int(self.brake_pedal_target / 0.1) & 0xFF), 32, 39)
+
         checksum_101 = (self._checksum_101, 56, 63)
 
-        return generate_byte_array(8, brake_en_ctrl, aeb_en_ctrl, brake_dec, brake_pedal_target, checksum_101)
+        return generate_byte_array(8, brake_en_ctrl, aeb_en_ctrl, brake_dec_upper_byte, brake_dec_lower_byte,
+                                   brake_pedal_target_upper_byte, brake_pedal_target_lower_byte, checksum_101)
 
     @staticmethod
     def validate_brake_en_ctrl(val):

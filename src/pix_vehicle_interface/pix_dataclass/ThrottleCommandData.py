@@ -46,18 +46,26 @@ class ThrottleCommandData:
         self._checksum_100 = 0
 
     def get_bytearray(self):
-        en_ctrl = (self.throttle_en_ctrl, 0, 0)
-        acc = (self.throttle_acc, 14, 23)
-        pedal_target = (self.throttle_pedal_target, 24, 31)
 
-        split_vel_1 = split_data(int(self.vel_target), 0, 7)
-        split_vel_2 = split_data(int(self.vel_target), 8, 11)
-        vel_1 = (split_vel_1, 40, 47)
-        vel_2 = (split_vel_2, 52, 55)
+        throttle_en_ctrl = (self.throttle_en_ctrl, 0, 0)
+        throttle_acc_upper_byte = (((int(self.throttle_acc / 0.01) >> 8) & 0xFF), 8, 15)
+        throttle_acc_lower_byte = ((int(self.throttle_acc / 0.01) & 0b11), 22, 23)
+
+        throttle_pedal_target_upper_byte = (((int(self.throttle_pedal_target / 0.1) >> 8) & 0xFF) , 24, 31)
+        throttle_pedal_target_lower_byte = ((int(self.throttle_pedal_target/ 0.1) & 0xFF), 32, 39)
+
+        throttle_vel_target_upper_byte = (((int(self.vel_target / 0.01) >> 8) & 0xFF) , 40, 47)
+        throttle_vel_target_lower_byte = ((int(self.vel_target / 0.01) & 0b11), 54, 55)
+
+
+
 
         checksum = (self._checksum_100, 56, 63)
 
-        return generate_byte_array(8, en_ctrl, acc, pedal_target, vel_1, vel_2, checksum)
+        return generate_byte_array(8,  throttle_en_ctrl, throttle_acc_upper_byte,
+                                   throttle_acc_lower_byte, throttle_pedal_target_upper_byte,
+                                   throttle_pedal_target_lower_byte, throttle_vel_target_upper_byte,
+                                   throttle_vel_target_lower_byte, checksum)
 
     @staticmethod
     def validate_throttle_en_ctrl(val):

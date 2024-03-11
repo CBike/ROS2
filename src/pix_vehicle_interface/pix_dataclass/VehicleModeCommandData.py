@@ -41,7 +41,7 @@ class VehicleModeCommandData:
             'steer_mode_ctrl': 0,
             'drive_mode_ctrl': 0,
             'turn_light_ctrl': 0,
-            '_checksum_105' : 0
+            '_checksum_105': 0
         }
 
         self.update_value(**command_data)

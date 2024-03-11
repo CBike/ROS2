@@ -86,8 +86,8 @@ class CANCommandNode(Node):
                 'gear_en_ctrl': msg.gear_en_ctrl,
                 'gear_target': msg.gear_target,
             }
-
             self.gear_data.update_value(**command_data)
+
         elif isinstance(msg, ParkCommand):
 
             command_data = {
@@ -96,6 +96,7 @@ class CANCommandNode(Node):
             }
 
             self.park_data.update_value(**command_data)
+            
         elif isinstance(msg, VehicleModeCommand):
             command_data = {
                 'steer_mode_ctrl': msg.steer_mode_ctrl,
@@ -106,29 +107,25 @@ class CANCommandNode(Node):
             self.vm_data.update_value(**command_data)
 
     def can_send_timer_callback(self):
-        def check_communication_timeout():
-            now = time_ns()
-            self.get_logger().info(f'Gear Communication Time out: {now - self.park_data.get_value("last_update_time")}')
+        now = time_ns()
 
-            if now - self.throttle_data.get_value('last_update_time') > 30000000:
-                self.throttle_data.reset_data()
+        if (now - self.throttle_data.get_value('last_update_time')) > 3000000:
+            self.throttle_data.reset_data()
 
-            elif now - self.brake_data.get_value('last_update_time') > 30000000:
-                self.brake_data.reset_data()
+        elif (now - self.brake_data.get_value('last_update_time')) > 3000000:
+            self.brake_data.reset_data()
 
-            elif now - self.steering_data.get_value('last_update_time') > 30000000:
-                self.steering_data.reset_data()
+        elif (now - self.steering_data.get_value('last_update_time')) > 3000000:
+            self.steering_data.reset_data()
 
-            elif now - self.gear_data.get_value('last_update_time') > 30000000:
-                self.gear_data.reset_data()
+        elif (now - self.gear_data.get_value('last_update_time')) > 3000000:
+            self.gear_data.reset_data()
 
-            elif now - self.park_data.get_value('last_update_time') > 30000000:
-                self.park_data.reset_data()
+        elif (now - self.park_data.get_value('last_update_time')) > 3000000:
+            self.park_data.reset_data()
 
-            elif now - self.vm_data.get_value('last_update_time') > 30000000:
-                self.vm_data.reset_data()
-
-        check_communication_timeout()
+        elif (now - self.vm_data.get_value('last_update_time')) > 3000000:
+            self.vm_data.reset_data()
 
         self.throttle_data.add_checksum()
         self.brake_data.add_checksum()
@@ -136,7 +133,7 @@ class CANCommandNode(Node):
         self.gear_data.add_checksum()
         self.park_data.add_checksum()
         self.vm_data.add_checksum()
-
+        self.get_logger().info(f'steering_data:{self.steering_data}')
         self.can_sender.send(0x100, self.throttle_data.get_bytearray())
         self.can_sender.send(0x101, self.brake_data.get_bytearray())
         self.can_sender.send(0x102, self.steering_data.get_bytearray())

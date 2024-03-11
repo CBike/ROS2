@@ -1,3 +1,5 @@
+import struct
+
 def generate_byte_array(array_size: int, *args) -> bytearray:
     """Generates a bytearray filled with data extracted from arguments within specified bit ranges.
 
@@ -66,72 +68,29 @@ def split_data(data: int, start_bit: int, end_bit: int) -> int:
     return extracted_data
 
 
-def extract_bits(byte_array: bytearray, start_bit: int, end_bit: int) -> int:
-    """Extracts bits from a bytearray within the specified bit range.
-
-    Args:
-        byte_array (bytearray): The bytearray from which bits will be extracted.
-        start_bit (int): The starting bit index (inclusive) of the range to extract.
-        end_bit (int): The ending bit index (inclusive) of the range to extract.
-
-    Returns:
-        int: The extracted bits within the specified bit range.
-
-    This function extracts bits from the given bytearray within the specified bit range.
-    It iterates through each bit in the range and extracts it from the corresponding byte
-    in the bytearray. The extracted bits are combined and returned as an integer.
-    """
-    # Calculate the number of bits in the range
-    num_bits = end_bit - start_bit + 1
-
-    # Variable to store the extracted bits
-    extracted_bits = 0
-
-    # Extract bits from the bytearray and add them to extracted_bits
-    for i in range(num_bits):
-        # Calculate the index of the current bit
-        bit_index = start_bit + i
-
-        # Calculate the index and offset of the byte containing the current bit
-        byte_index, bit_offset = divmod(bit_index, 8)
-
-        # Extract the bit from the byte and add it to extracted_bits
-        extracted_bits <<= 1
-        extracted_bits |= (byte_array[byte_index] >> (7 - bit_offset)) & 1
-
-    return extracted_bits
 
 
-def bytearray_to_bits(byte_array: bytearray) -> str:
-    """Converts a bytearray to a binary string representation.
-
-    Args:
-        byte_array (bytearray): The bytearray to convert.
-
-    Returns:
-        str: A binary string representing the contents of the bytearray.
-
-    This function takes a bytearray as input and converts it to a binary string representation.
-    It iterates through each byte in the bytearray, converts it to binary, and adds it to a bit string.
-    The resulting bit string represents the contents of the input bytearray.
-    """
-    bits = ""
-    for byte in byte_array:
-        bits += bin(byte)[2:].zfill(8)  # Convert each byte to binary and add it to a bit string
-    return bits
-
-
-def int_to_bits(n: int) -> str:
-    """Converts an integer to its binary representation as a string.
-
-    Args:
-        n (int): The integer to convert.
-
-    Returns:
-        str: A binary string representing the integer, padded with zeros to ensure a length of 8.
-    """
-    return bin(n)[2:].zfill(8)
+def format_candump(byte_array):
+    hex_representation = ' '.join(format(byte, '02x') for byte in byte_array)
+    ascii_representation = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in byte_array)
+    return f"{hex_representation}  [{ascii_representation}]"
 
 
 
 
+if __name__ == "__main__":
+    data = 500
+    upper_byte = (data >> 8) & 0xFF
+    lower_byte = data & 0xFF
+    print("상위 8비트:", upper_byte)
+    print("하위 8비트:", lower_byte)
+    steer_en_ctrl = (1, 0, 0)
+    steer_angle_spd = (255, 8, 15)
+    steer_angle_upper_byte = (upper_byte, 24, 31)
+    steer_angle_lower_byte= (lower_byte, 32, 39)
+    steer_ange = (500, 24, 39)
+    checksum_102 = (0, 56, 63)
+
+    result = generate_byte_array(8, steer_en_ctrl, steer_angle_spd, steer_angle_upper_byte, steer_angle_lower_byte, checksum_102)
+    hex_representation = format_candump(result)
+    print(f'byte array ::{hex_representation}')

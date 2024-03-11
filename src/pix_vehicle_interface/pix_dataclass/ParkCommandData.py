@@ -34,9 +34,12 @@ class ParkCommandData:
         self._checksum_104 += 1
 
     def reset_data(self):
-        self.park_en_ctrl = 0
-        self.park_target = 0
-        self._checksum_104 = 0
+        reset_data = {
+            'park_en_ctrl': 0,
+            'park_target': 0,
+            '_checksum_104': 0
+        }
+        self.update_value(**reset_data)
 
     def get_bytearray(self):
         park_en_ctrl = (self.park_en_ctrl, 0, 0)
@@ -52,5 +55,3 @@ class ParkCommandData:
     @staticmethod
     def validate_park_target(val):
         return 0 <= val <= 1
-
-

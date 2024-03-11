@@ -36,13 +36,14 @@ class TestControlNode(Node):
         b_msg.header.frame_id = ''
         b_msg.aeb_en_ctrl = 1
         b_msg.brake_en_ctrl = 1
-        b_msg.brake_dec = 4.0
-        b_msg.brake_pedal_target = 4.0
+        b_msg.brake_dec = 10.0
+        b_msg.brake_pedal_target = 10.0
 
         g_msg = GearCommand()
         g_msg.header.stamp = self.get_clock().now().to_msg()
         g_msg.header.frame_id = ''
         g_msg.gear_en_ctrl = 1
+        # 0x00 INVALID , 0x01 PARK 0x02 REVERSE 0x03 NEUTRAL 0x04 DRIVE
         g_msg.gear_target = 1
 
         p_msg = ParkCommand()

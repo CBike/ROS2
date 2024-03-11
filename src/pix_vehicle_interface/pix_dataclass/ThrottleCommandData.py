@@ -64,6 +64,8 @@ class ThrottleCommandData:
 
 
 
+
+
         checksum = (self._checksum_100, 56, 63)
 
         return generate_byte_array(8,  throttle_en_ctrl, throttle_acc_upper_byte,

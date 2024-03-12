@@ -49,6 +49,7 @@ class BrakeCommandData:
         }
         self.update_value(**command_data)
     def get_bytearray(self):
+
         brake_en_ctrl = (self.brake_en_ctrl, 0, 0)
         aeb_en_ctrl = (self.aeb_en_ctrl, 1, 1)
 

@@ -284,16 +284,15 @@ class CANReceiver:
 
         brake_light_actual = 1 if ((struct.unpack('>B', data[1:2])[0] & 0b00001000) > 0) else 0
 
-        acc = ((struct.unpack('>h', data[1:3])[0] & 0b1111000000000000) >> 12 |
-               struct.unpack('>h', data[1:3])[0] & 0b0000000111111111) * 0.001
+        acc = (struct.unpack('>b', data[0:1])[0] | struct.unpack('>b', data[1:2])[0] & 0b11110000) * 0.001
 
-        speed = struct.unpack('>h', data[3:5])[0] * 0.001
-        aeb_state = struct.unpack('>B', data[5:6])[0] & 0b00000001
-        front_crash_state = struct.unpack('>B', data[5:6])[0] & 0b00000010
-        back_crash_state = struct.unpack('>B', data[5:6])[0] & 0b00000100
-        vehicle_mode_state = struct.unpack('>B', data[5:6])[0] & 0b00011000
-        driver_mode_state = struct.unpack('>B', data[5:6])[0] & 0b1110000
-        chassis_errcode = struct.unpack('>B', data[6:7])[0]
+        speed = struct.unpack('>h', data[2:4])[0] * 0.001
+        aeb_state = struct.unpack('>B', data[4:5])[0] & 0b00000001
+        front_crash_state = struct.unpack('>B', data[4:5])[0] & 0b00000010
+        back_crash_state = struct.unpack('>B', data[4:5])[0] & 0b00000100
+        vehicle_mode_state = struct.unpack('>B', data[4:5])[0] & 0b00011000
+        driver_mode_state = struct.unpack('>B', data[4:5])[0] & 0b11100000
+        chassis_errcode = struct.unpack('>B', data[5:6])[0]
         turn_light_actual = struct.unpack('>B', data[7:8])[0] & 0b00000011
 
         parsed_data = dict()

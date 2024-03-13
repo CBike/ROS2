@@ -61,21 +61,21 @@ class TestControlNode(Node):
         # s_msg.steer_angle_target = 0
         # s_msg.steer_angle_spd = 0
 
-        # v_msg = VehicleModeCommand()
-        # v_msg.header.stamp = self.get_clock().now().to_msg()
-        # v_msg.header.frame_id = ''
-        # # [] [0|7] 0-off 1-left on 2-right on 3- hazard warning
-        # v_msg.turn_light_ctrl = 0
-        # # [] [0|7] 0-throttle_pedal_drive 1-speed_drive
-        # v_msg.drive_mode_ctrl = 0
-        # # [] [0|7] 0-standard_steer 1-non_direction_steer 2-sync_direction_steer
-        # v_msg.steer_mode_ctrl = 0
+        v_msg = VehicleModeCommand()
+        v_msg.header.stamp = self.get_clock().now().to_msg()
+        v_msg.header.frame_id = ''
+        # [] [0|7] 0-off 1-left on 2-right on 3- hazard warning
+        v_msg.turn_light_ctrl = 0
+        # [] [0|7] 0-throttle_pedal_drive 1-speed_drive
+        v_msg.drive_mode_ctrl = 1
+        # [] [0|7] 0-standard_steer 1-non_direction_steer 2-sync_direction_steer
+        v_msg.steer_mode_ctrl = 0
 
         # self.throttle_control_publisher.publish(t_msg)
         self.brake_control_publisher.publish(b_msg)
         # self.steer_control_publisher.publish(s_msg)
         # self.gear_control_publisher.publish(g_msg)
-        # self.vcu_control_publisher.publish(v_msg)
+        self.vcu_control_publisher.publish(v_msg)
         # self.park_control_publisher.publish(p_msg)
 
 

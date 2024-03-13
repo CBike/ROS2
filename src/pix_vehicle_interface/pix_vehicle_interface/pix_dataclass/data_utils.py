@@ -26,7 +26,7 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
         start_byte, start_bit_offset = divmod(start_bit, 8)
         end_byte, end_bit_offset = divmod(end_bit, 8)
 
-        for byte_offset in range(start_byte, end_byte+1,):
+        for byte_offset in range(start_byte, end_byte+1):
             byte_value = 0
             # Iterate through each bit in the byte
             for bit_offset in range(8):

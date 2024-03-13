@@ -166,13 +166,13 @@ class CANReceiver:
         brake_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
         brake_flt1 = struct.unpack('>B', data[1:2])[0]
         brake_flt2 = struct.unpack('>B', data[2:3])[0]
-        brake_pedal_actual = struct.unpack('>B', data[3:4])[0] * 0.1
+        brake_pedal_actual = float(struct.unpack('>H', data[3:5])[0] * 0.1)
 
         parsed_data = dict()
         parsed_data['brake_en_state'] = brake_en_state if is_valid_brake_en_state(brake_en_state) else 0
         parsed_data['brake_flt1'] = brake_flt1 if is_valid_brake_flt1(brake_flt1) else 0
         parsed_data['brake_flt2'] = brake_flt2 if is_valid_brake_flt2(brake_flt2) else 0
-        parsed_data['brake_pedal_actual'] = brake_pedal_actual if is_valid_brake_pedal_actual(brake_pedal_actual) else 0
+        parsed_data['brake_pedal_actual'] = brake_pedal_actual if is_valid_brake_pedal_actual(brake_pedal_actual) else 0.0
 
         return parsed_data
 

@@ -36,12 +36,13 @@ class TestControlNode(Node):
         b_msg.header.frame_id = ''
         b_msg.aeb_en_ctrl = 1
         b_msg.brake_en_ctrl = 1
-        b_msg.brake_dec = 10.0
+        b_msg.brake_dec = 0.1
         b_msg.brake_pedal_target = 10.0
 
         g_msg = GearCommand()
         g_msg.header.stamp = self.get_clock().now().to_msg()
         g_msg.header.frame_id = ''
+
         g_msg.gear_en_ctrl = 1
         # 0x00 INVALID , 0x01 PARK 0x02 REVERSE 0x03 NEUTRAL 0x04 DRIVE
         g_msg.gear_target = 1
@@ -57,13 +58,16 @@ class TestControlNode(Node):
         s_msg.header.frame_id = ''
         s_msg.steer_en_ctrl = 1
         s_msg.steer_angle_target = 0
-        s_msg.steer_angle_spd = 0
+        s_msg.steer_angle_spd = 125
 
         v_msg = VehicleModeCommand()
         v_msg.header.stamp = self.get_clock().now().to_msg()
         v_msg.header.frame_id = ''
+        # [] [0|7] 0-off 1-left on 2-right on 3- hazard warning
         v_msg.turn_light_ctrl = 1
+        # [] [0|7] 0-throttle_pedal_drive 1-speed_drive
         v_msg.drive_mode_ctrl = 1
+        # [] [0|7] 0-standard_steer 1-non_direction_steer 2-sync_direction_steer
         v_msg.steer_mode_ctrl = 1
 
         self.throttle_control_publisher.publish(t_msg)

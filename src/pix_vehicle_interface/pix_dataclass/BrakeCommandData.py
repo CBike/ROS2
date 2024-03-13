@@ -53,7 +53,7 @@ class BrakeCommandData:
         brake_en_ctrl = (self.brake_en_ctrl, 0, 0)
         aeb_en_ctrl = (self.aeb_en_ctrl, 1, 1)
 
-        brake_dec_upper_byte = (((int(self.brake_dec / 0.01) >> 8) & 0xFF), 8, 15)
+        brake_dec_upper_byte = (((int(self.brake_dec / 0.01) >> 2) & 0xFF), 8, 15)
         brake_dec_lower_byte = ((int(self.brake_dec / 0.01) & 0b11), 22, 23)
 
         brake_pedal_target_upper_byte = (((int(self.brake_pedal_target / 0.1) >> 8) & 0xFF), 24, 31)

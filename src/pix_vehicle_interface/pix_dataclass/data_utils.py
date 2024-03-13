@@ -36,8 +36,7 @@ def generate_byte_array(array_size: int, *args: object) -> bytearray:
                 # Check if the current bit falls within the specified range
                 if start_bit <= current_bit <= end_bit:
                     # Extract the bit value from the data and set it in the byte_value
-                    bit_value = (data >> current_bit - bit_offset) & 1 if start_bit == end_bit \
-                        else ((data >> bit_offset) & 1)
+                    bit_value = (data >> (current_bit - start_bit)) & 1
                     byte_value |= bit_value << bit_offset
 
             # Store the byte_value in the byte array

@@ -50,15 +50,14 @@ class ThrottleCommandData:
         self.update_value(**command_data)
 
     def get_bytearray(self):
-
         throttle_en_ctrl = (self.throttle_en_ctrl, 0, 0)
-        throttle_acc_upper_byte = (((int(self.throttle_acc / 0.01) >> 8) & 0xFF), 8, 15)
+        throttle_acc_upper_byte = (((int(self.throttle_acc / 0.01) >> 2) & 0xFF), 8, 15)
         throttle_acc_lower_byte = ((int(self.throttle_acc / 0.01) & 0b11), 22, 23)
 
-        throttle_pedal_target_upper_byte = (((int(self.throttle_pedal_target / 0.1) >> 8) & 0xFF) , 24, 31)
-        throttle_pedal_target_lower_byte = ((int(self.throttle_pedal_target/ 0.1) & 0xFF), 32, 39)
+        throttle_pedal_target_upper_byte = (((int(self.throttle_pedal_target / 0.1) >> 8) & 0xFF), 24, 31)
+        throttle_pedal_target_lower_byte = ((int(self.throttle_pedal_target / 0.1) & 0xFF), 32, 39)
 
-        throttle_vel_target_upper_byte = (((int(self.vel_target / 0.01) >> 8) & 0xFF) , 40, 47)
+        throttle_vel_target_upper_byte = (((int(self.vel_target / 0.01) >> 2) & 0xFF), 40, 47)
         throttle_vel_target_lower_byte = ((int(self.vel_target / 0.01) & 0b11), 54, 55)
 
 

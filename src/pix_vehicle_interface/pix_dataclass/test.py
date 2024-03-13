@@ -36,8 +36,7 @@ def generate_byte_array(array_size: int, *args: object) -> bytearray:
                 # Check if the current bit falls within the specified range
                 if start_bit <= current_bit <= end_bit:
                     # Extract the bit value from the data and set it in the byte_value
-                    bit_value = (data >> current_bit - bit_offset) & 1 if start_bit == end_bit \
-                        else ((data >> bit_offset) & 1)
+                    bit_value = (data >> (current_bit - start_bit)) & 1
                     byte_value |= bit_value << bit_offset
 
             # Store the byte_value in the byte array
@@ -93,7 +92,22 @@ def print_byte_array(byte_array):
 
 
 if __name__ == '__main__':
+    throttle_en_ctrl = (1, 0, 0)
 
+    throttle_acc = 1.0 / 0.01
+
+    throttle_acc_upper_byte = (((int(throttle_acc) >> 2) & 0xFF), 8, 15)
+    throttle_acc_lower_byte = ((int(throttle_acc) & 0b11), 22, 33)
+
+    print(throttle_acc)
+    throttle_pedal_target = 10.0 / 0.1
+    throttle_pedal_target_upper_byte = (((int(throttle_pedal_target) >> 8) & 0xFF), 24, 31)
+    throttle_pedal_target_lower_byte = ((int(throttle_pedal_target) & 0xFF), 32, 39)
+    print(throttle_pedal_target)
+    vel_target = 10.23 / 0.01
+    throttle_vel_target_upper_byte = (((int(vel_target) >> 2) & 0xFF), 40, 47)
+    throttle_vel_target_lower_byte = ((int(vel_target) & 0b11), 54, 55)
+    print(vel_target)
     steer_en_ctrl = (1, 0, 0)
     steer_angle_spd = (125, 8, 15)
     steer_angle_target_upper_data = ((((0 + 500) >> 8) & 0xFF), 24, 31)
@@ -101,33 +115,29 @@ if __name__ == '__main__':
 
     aeb_en_ctrl = (1, 1, 1)
     brake_en_ctrl = (1, 0, 0)
-    brake_dec = 0.1
-    brake_pedal_target = 10.0
-    brake_dec_upper_byte = (((int(brake_dec / 0.01) >> 8) & 0xFF), 8, 15)
-    brake_dec_lower_byte = ((int(brake_dec / 0.01) & 0b11), 22, 23)
+    brake_dec = 0.1 / 0.01
+    brake_pedal_target = 10.0 / 0.1
+    brake_dec_upper_byte = (((int(brake_dec) >> 2) & 0xFF), 8, 15)
+    brake_dec_lower_byte = ((int(brake_dec) & 0b11), 22, 23)
+    brake_pedal_target_upper_byte = (((int(brake_pedal_target) >> 8) & 0xFF), 24, 31)
+    brake_pedal_target_lower_byte = ((int(brake_pedal_target) & 0xFF), 32, 39)
 
-    # print(f'brake_dec_upper_byte ::{brake_dec_upper_byte[0]}')
-    # print(f'brake_dec_lower_byte ::{brake_dec_lower_byte[0]}')
-    # #
-    # brake_pedal_target_upper_byte = (((int(brake_pedal_target / 0.1) >> 8) & 0xFF), 24, 31)
-    # brake_pedal_target_lower_byte = ((int(brake_pedal_target / 0.1) & 0xFF), 32, 39)
-    # #
-    # print(f'brake_pedal_target_upper_byte :: {brake_pedal_target_upper_byte[0]}')
-    # print(f'brake_pedal_target_lower_byte :: {brake_pedal_target_lower_byte[0]}')
+    gear_en_ctrl = (1, 0, 0)
+    gear_target = (4, 8, 10)
 
-    ret = generate_byte_array(8, brake_dec_lower_byte)
-    print_byte_array(ret)
+    park_en_ctrl = (1, 0, 0)
+    park_target = (1, 8, 8)
 
-    # 예시 사용법
-    byte_array_size = 8  # 바이트 배열 크기
-    byte_array = bytearray(byte_array_size)  # 빅 엔디안 바이트 배열 초기화
+    steer_mode_ctrl = (2, 0, 2)
+    drive_mode_ctrl = (0, 8, 10)
+    turn_light_ctrl = (3, 16, 17)
 
-    data_value = 10  # 데이터 값
-    start_bit_index = 2  # 시작 비트 인덱스
-    end_bit_index = 5  # 끝 비트 인덱스
+   # ret = generate_byte_array(8, throttle_en_ctrl, throttle_acc_upper_byte, throttle_acc_lower_byte,
+   #                           throttle_pedal_target_upper_byte, throttle_pedal_target_lower_byte,
+   #                           throttle_vel_target_upper_byte, throttle_vel_target_lower_byte)
+   # print_byte_array(ret)
 
-    # 데이터를 바이트 배열의 지정된 비트 범위에 대입
-    set_data_in_byte_array(byte_array, data_value, start_bit_index, end_bit_index)
-
-    # 결과 확인
-    print(byte_array)
+    for i in range(1, 256):
+        checksum = (i, 56, 63)
+        ret = generate_byte_array(8, checksum)
+        print_byte_array(ret)

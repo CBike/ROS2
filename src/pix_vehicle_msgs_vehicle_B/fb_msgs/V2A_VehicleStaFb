@@ -1,5 +1,16 @@
 std_msgs/Header header
-int8 steering_en_state
-int8 steering_control_out_of_bounds_reminder
-int8 front_angle_fb
-int8 rear_angle_fb
+
+# [] [0|1] 0:off 1:on
+int8 position_light_status_fb 0
+
+# [] [0|1] 0:off 1:on
+int8 low_light_status_fb 0
+
+# [] [0|1] 0:off 1:on
+int8 left_turning_light_status_fb 0
+
+# [] [0|1] 0:off 1:on
+int8 light_turning_light_status_fb 0
+
+# [] [0|1] 0:off 1:on
+int8 hazard_warning_light_switch_status 0

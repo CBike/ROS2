@@ -7,10 +7,10 @@ int8 vehicle_charge_status 0
 int8 vehicle_power_battery_electricity_amount 0
 
 # [V] [0|1000]
-int32 vehicle_power_battery_voltage 0
+float32 vehicle_power_battery_voltage 0.0
 
 # [A] [-1000|1000]
-int32 vehicle_power_battery_current 0
+float32 vehicle_power_battery_current 0.0
 
 # [℃] [-40|80]
 int8 bms_maximum_monomer_temperature 0

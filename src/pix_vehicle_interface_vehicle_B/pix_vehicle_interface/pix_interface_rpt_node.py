@@ -41,12 +41,6 @@ class CANReceiverNode(Node):
     def pub_throttle_report(self):
         """
         Publishes ThrottleReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        throttle_pedal_actual(float32, unsigned): - Throttle pedal pressure percentage(%/0/0.1/0)[0,100]
-        throttle_flt2(int8, unsigned): 0-No fault 1-Drive System Communication Fault(-/0/1/0)[0,1]
-        throttle_flt1(int8, unsigned): 0-No fault 1-Drive System Hardware Fault(-/0/1/0)[0,1]
-        throttle_en_state(int8, unsigned): 0-Manual 1-Auto 2-Takeover 3-Standby (-/0/1/0)[0,3]
         """
 
         get_msg = self.can_receiver.get_report('throttle')
@@ -66,12 +60,6 @@ class CANReceiverNode(Node):
     def pub_brake_report(self):
         """
          Publishes BrakeReport messages based on parsed CAN data.
-         Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-         brake_pedal_actual(float32, unsigned): Brake pedal pressure percentage(%/0/0.1/0)[0,100]
-         brake_flt2(int8, unsigned): 0x00-No fault 0x01-Drive system Communication fault(-/0/1/0)[0,1]
-         brake_flt1(int8, unsigned): 0x00-No fault 0x01-Drive system hardware fault(-/0/1/0)[0,1]
-         brake_en_state(int8, unsigned): 0x00-Manual 0x01-Auto 0x02-Takeover 0x03-Standby(-/0/1/0)[0,3]
          """
         get_msg = self.can_receiver.get_report('brake')
         if get_msg is not None:
@@ -91,13 +79,6 @@ class CANReceiverNode(Node):
     def pub_steer_report(self):
         """
         Publishes SteerReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        steer_en_state(int8, unsigned): 0x00-Manual 0x01-Auto 0x02-Takeover 0x03-Standby (-/0/1/0)[0,3]
-        steer_flt1(int8, unsigned): 0x00-No fault 0x01-Drive system hardware fault(-/0/1/0)[0,1]
-        steer_flt2(int8, unsigned): 0x00-No fault 0x01-Drive system Communication fault(-/0/1/0)[0,1]
-        steer_angle_actual(int32, unsigned): steering angle value(deg/0/1/-500)[-360,360]
-        steer_angle_spd_actual(int32, unsigned): Steering rotation speed value((deg/s)/0/1/0)[0,255]
         """
         get_msg = self.can_receiver.get_report('steer')
         if get_msg is not None:
@@ -119,10 +100,6 @@ class CANReceiverNode(Node):
     def pub_gear_report(self):
         """
         Publishes GearReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        gear_flt(int8, unsigned): 0x00-No fault 0x01-Fault(-/0/1/0)[0,1]
-        gear_actual(int8, unsigned): 0x00-INVALID 0x01-PARK 0x02-REVERSE 0x03-NEUTRAL 0x04-Drive(-/0/1/0)[0,4]
         """
         get_msg = self.can_receiver.get_report('gear')
         if get_msg is not None:
@@ -137,10 +114,6 @@ class CANReceiverNode(Node):
     def pub_park_report(self):
         """
         Publishes ParkReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        parking_actual(int8, unsigned):0x00-Release 0x01-Parking_trigger (-/0/1/0)[0,1]
-        park_flt(int8, unsigned):0x00-No Fault 0x01-Fault (-/0/1/0)[0,1]
         """
         get_msg = self.can_receiver.get_report('park')
         if get_msg is not None:
@@ -155,21 +128,6 @@ class CANReceiverNode(Node):
     def pub_vcu_report(self):
         """
         Publishes VcuReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-
-        brake_light_actual(int8, unsigned): 0x00-BrakeLight_OFF 0x01-BrakeLight_ON (-/0/1/0)[0,1]
-        turn_light_actual(int8, unsigned): 0x00-Turn lamp sts_OFF 0x01-Left_Turn lamp sts_ON 0x02-Right_Turn lamp sts_ON
-                                           0x03-Hazard_Warning_lamp sts_ON (-/0/1/0) [0, 3]
-        chassis_errcode(int8, unsigned): - (-/0/1/0) [0, 255]
-        drive_mode_sts(int8, unsigned): 0x00-Throttle Paddle Drive Mode 0x01-Speed Drive Mode (-/0/1/0)[0,7]
-        steer_mode_sts(int8, unsigned): 0x00-Standard 0x01-Non Direction 0x02-Sync Direction (-/0/1/0)[0,2]
-        vehicle_mode_state(int8, unsigned): 0x00-Manual Remote 0x01-Auto 0x02-Emergency 0x03-Standby(-/0/1/0)[0, 3]
-        front_crash_state(int8, unsigned): 0x00-No Event 0x01-Crash Event(-/0/1/0)[0,1]
-        back_crash_state(int8, unsigned): 0x00-No Event 0x01-Crash Event(-/0/1/0)[0,1]
-        aeb_state(int8, unsigned): 0x00-Inactive 0x01-Active(-/0/1/0)[0, 1]
-        acc(float32, signed): Acceleration ((m/s^2)/0/0.01/0) [-10,10]
-        speed(float32, signed): velocity ((m/s)/0/0.001/0) [-32.768,32.768]
         """
         get_msg = self.can_receiver.get_report('vcu')
         if get_msg is not None:
@@ -196,12 +154,6 @@ class CANReceiverNode(Node):
     def pub_wheel_speed_report(self):
         """
         Publishes WheelSpeedReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        rr(float32): rear right wheel speed (m/s/0/0.001/0) [0, 65.535]
-        rl(float32): rear left wheel speed (m/s/0/0.001/0) [0, 65.535]
-        fr(float32): front right wheel speed (m/s/0/0.001/0) [0, 65.535]
-        fl(float32): front left wheel speed (m/s/0/0.001/0) [0, 65.535]
         """
         get_msg = self.can_receiver.get_report('wheel_speed')
         if get_msg is not None:
@@ -218,11 +170,6 @@ class CANReceiverNode(Node):
     def pub_bms_report(self):
         """
         Publishes BmsReport messages based on parsed CAN data.
-        Name(type) : value-Description  (Unit / Init / Factor / Offset) [range min,max]
-
-        battery_current(float32): (V/0/0.01/0) [0,300]
-        battery_voltage(float32): (A/0/0.1/-3200) [-3200, 3353.5]
-        battery_soc(int32): (%/0/1/0)[0, 100]
         """
         get_msg = self.can_receiver.get_report('bms')
         if get_msg is not None:

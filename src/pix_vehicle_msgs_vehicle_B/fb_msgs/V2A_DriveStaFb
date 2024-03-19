@@ -13,13 +13,13 @@ int8 drive_mode_fb 0
 int8 gear_status 0
 
 # [m/s] [-50|50] Feedback is relative to actual speed
-int8 actual_speed_fb 0
+float32 actual_speed_fb 0.00
 
 # [%] [0|100] Throttle request value 0~100%
-int8 throttle_request_val_fb 0
+float32 throttle_request_val_fb 0.0
 
 # [m/s^2] [-20|20] Reserved
-int8 vehicle_accel 0
+float32 vehicle_accel 0.00
 
 # [] [0|15]
 int8 vcu_cycle_count 0

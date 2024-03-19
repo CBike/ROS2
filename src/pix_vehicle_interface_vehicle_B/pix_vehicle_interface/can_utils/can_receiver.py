@@ -20,14 +20,15 @@ class CANReceiver:
 
         # Queue for storing received messages of different types
         self.report_message_queues = {
-            'throttle': queue.Queue(),
-            'brake': queue.Queue(),
-            'steer': queue.Queue(),
-            'gear': queue.Queue(),
-            'park': queue.Queue(),
-            'vcu': queue.Queue(),
-            'wheel_speed': queue.Queue(),
-            'bms': queue.Queue(),
+            'drive_sta_fb': queue.Queue(),
+            'brake_sta_fb': queue.Queue(),
+            'steer_sta_fb': queue.Queue(),
+            'vehicle_work_sta_fb': queue.Queue(),
+            'power_sta_fb': queue.Queue(),
+            'vehicle_sta_fb': queue.Queue(),
+            'vehicle_flt_sta_fb': queue.Queue(),
+            'chassis_wheel_rpm_fb': queue.Queue(),
+            'chassis_wheel_torque_fb': queue.Queue(),
         }
 
         # Thread for receiving CAN message in the background
@@ -95,14 +96,15 @@ class CANReceiver:
         - str: Report type or None if not found.
         """
         report_types = {
-            0x500: 'throttle',
-            0x501: 'brake',
-            0x502: 'steer',
-            0x503: 'gear',
-            0x504: 'park',
-            0x505: 'vcu',
-            0x506: 'wheel_speed',
-            0x512: 'bms',
+            0x530: 'drive_sta_fb',
+            0x531: 'brake_sta_fb',
+            0x532: 'steer_sta_fb',
+            0x534: 'vehicle_work_sta_fb',
+            0x535: 'power_sta_fb',
+            0x536: 'vehicle_sta_fb',
+            0x537: 'vehicle_flt_sta_fb',
+            0x539: 'chassis_wheel_rpm_fb',
+            0x542: 'chassis_wheel_torque_fb',
         }
         return report_types.get(can_id)
 
@@ -122,239 +124,446 @@ class CANReceiver:
             return None
 
     @staticmethod
-    def parsing_can_data_throttle_report(data):
-        def is_valid_throttle_en_state(value):
-            return 0 <= value <= 3
+    def parsing_can_data_drive_sta_fb(data):
+        def validate_drive_en_state(data):
+            return 0 <= data <= 1
 
-        def is_valid_throttle_flt1(value):
-            return 0 <= value <= 1
+        def validate_reminder_for_drive_control_out_of_bounds(data):
+            return 0 <= data <= 1
 
-        def is_valid_throttle_flt2(value):
-            return 0 <= value <= 1
+        def validate_drive_mode_fb(data):
+            return 0 <= data <= 3
 
-        def is_valid_throttle_pedal_actual(value):
-            return 0 <= value <= 100
+        def validate_gear_status(data):
+            return 0 <= data <= 3
 
-        throttle_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
-        throttle_flt1 = struct.unpack('>B', data[1:2])[0]
-        throttle_flt2 = struct.unpack('>B', data[2:3])[0]
-        throttle_pedal_actual = struct.unpack('>B', data[3:4])[0] * 0.1
+        def validate_actual_speed_fb(data):
+            return -50 <= data <= 50
+
+        def validate_throttle_request_val_fb(data):
+            return 0 <= data <= 100
+
+        def validate_vehicle_accel(data):
+            return -20 <= data <= 20
+
+        def validate_vcu_cycle_count(data):
+            return 0 <= data <= 15
+
+        drive_en_state = struct.unpack('<B', data[0:1])[0] & 0b00000001
+        reminder_for_drive_control_out_of_bounds = (struct.unpack('<B', data[0:1])[0] >> 1) & 0b00000001
+        drive_mode_fb = (struct.unpack('<B', data[0:1])[0] >> 3) & 0b00000011
+        gear_status = (struct.unpack('<B', data[0:1])[0] >> 5) & 0b00000011
+        actual_speed_fb = struct.unpack('<H', data[1:3])[0] * 0.01
+        throttle_request_val_fb = struct.unpack('<B', data[3:4])[0] | struct.unpack('>B', data[4:5])[0] & 0b00000011
+        vehicle_accel = struct.unpack('<h', data[5:7])[0]
+        vcu_cycle_count = struct.unpack('<B', data[7:8])[0] & 0b00001111
 
         parsed_data = dict()
-        parsed_data['throttle_en_state'] = throttle_en_state if is_valid_throttle_en_state(throttle_en_state) else 0
-        parsed_data['throttle_flt1'] = throttle_flt1 if is_valid_throttle_flt1(throttle_flt1) else 0
-        parsed_data['throttle_flt2'] = throttle_flt2 if is_valid_throttle_flt2(throttle_flt2) else 0
-        parsed_data['throttle_pedal_actual'] = throttle_pedal_actual if is_valid_throttle_pedal_actual(
-            throttle_pedal_actual) else 0
+        parsed_data['drive_en_state'] = drive_en_state if validate_drive_en_state(drive_en_state) else 0
+
+        parsed_data['reminder_for_drive_control_out_of_bounds'] = reminder_for_drive_control_out_of_bounds \
+            if validate_reminder_for_drive_control_out_of_bounds(reminder_for_drive_control_out_of_bounds) else 0
+
+        parsed_data['drive_mode_fb'] = drive_mode_fb if validate_drive_mode_fb(drive_mode_fb) else 0
+
+        parsed_data['gear_status'] = gear_status if validate_gear_status(gear_status) else 0
+
+        parsed_data['actual_speed_fb'] = actual_speed_fb if validate_actual_speed_fb(actual_speed_fb) else 0.00
+
+        parsed_data['throttle_request_val_fb'] = throttle_request_val_fb \
+            if validate_throttle_request_val_fb(throttle_request_val_fb) else 0.0
+
+        parsed_data['vehicle_accel'] = vehicle_accel if validate_vehicle_accel(vehicle_accel) else 0.00
+
+        parsed_data['vcu_cycle_count'] = vcu_cycle_count if validate_vcu_cycle_count(vcu_cycle_count) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_brake_report(data):
-        def is_valid_brake_en_state(value):
-            return 0 <= value <= 3
+    def parsing_can_data_brake_sta_fb(data):
+        def validate_data_brake_en_state(data):
+            return 0 <= data <= 1
 
-        def is_valid_brake_flt1(value):
-            return 0 <= value <= 1
+        def validate_data_brake_light_en_state(data):
+            return 0 <= data <= 1
 
-        def is_valid_brake_flt2(value):
-            return 0 <= value <= 1
+        def validate_data_parking_state(data):
+            return 0 <= data <= 3
 
-        def is_valid_brake_pedal_actual(value):
-            return 0 <= value <= 100
+        def validate_data_brake_pedal_val_fb(data):
+            return 0 <= data <= 100
 
-        brake_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
-        brake_flt1 = struct.unpack('>B', data[1:2])[0]
-        brake_flt2 = struct.unpack('>B', data[2:3])[0]
-        brake_pedal_actual = float(struct.unpack('>H', data[3:5])[0] * 0.1)
+        def validate_data_brake_pressure_fb(data):
+            return 0 <= data <= 100
+
+        def validate_data_vcu_cycle_count(data):
+            return 0 <= data <= 15
+
+        brake_en_state = struct.unpack('<B', data[0:1])[0] & 0b00000001
+        brake_light_en_state = (struct.unpack('<B', data[0:1])[0] >> 2) & 0b00000001
+        parking_state = (struct.unpack('<B', data[0:1])[0] >> 4) & 0b00000011
+        brake_pedal_val_fb = ((struct.unpack('<B', data[1:2])[0]) |
+                              (struct.unpack('<B', data[2:3])[0] & 0b00000011)) * 0.1
+        brake_pressure_fb = struct.unpack('<B', data[3:4])[0]
+        vcu_cycle_count = struct.unpack('<B', data[6:7])[0] & 0b00001111
 
         parsed_data = dict()
-        parsed_data['brake_en_state'] = brake_en_state if is_valid_brake_en_state(brake_en_state) else 0
-        parsed_data['brake_flt1'] = brake_flt1 if is_valid_brake_flt1(brake_flt1) else 0
-        parsed_data['brake_flt2'] = brake_flt2 if is_valid_brake_flt2(brake_flt2) else 0
-        parsed_data['brake_pedal_actual'] = brake_pedal_actual if is_valid_brake_pedal_actual(brake_pedal_actual) else 0.0
+        parsed_data['brake_en_state'] = brake_en_state if validate_data_brake_en_state(brake_en_state) else 0
+        parsed_data['brake_light_en_state'] = brake_light_en_state if (
+            validate_data_brake_light_en_state(brake_light_en_state)) else 0
+        parsed_data['parking_state'] = parking_state if validate_data_parking_state(parking_state) else 0
+        parsed_data['brake_pedal_val_fb'] = brake_pedal_val_fb if validate_data_brake_pedal_val_fb(brake_pedal_val_fb) \
+            else 0.0
+        parsed_data['brake_pressure_fb'] = brake_pressure_fb if validate_data_brake_pressure_fb(brake_pressure_fb) \
+            else 0
+        parsed_data['vcu_cycle_count'] = vcu_cycle_count if validate_data_vcu_cycle_count(vcu_cycle_count) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_steer_report(data):
+    def parsing_can_data_steer_sta_fb(data):
+        def validate_steering_en_state(data):
+            return 0 <= data <= 1
 
-        def is_valid_steer_en_state(value):
-            return 0 <= value <= 3
+        def validate_steering_control_out_of_bounds_reminder(data):
+            return 0 <= data <= 4
 
-        def is_valid_steer_flt1(value):
-            return 0 <= value <= 1
+        def validate_steering_mode_fb(data):
+            return -500 <= data <= 500
 
-        def is_valid_steer_flt2(value):
-            return 0 <= value <= 1
+        def validate_front_steering_angle_fb(data):
+            return -500 <= data <= 500
 
-        def is_valid_steer_angle_actual(value):
-            return -500 <= value <= 500
+        def validate_rear_steering_angle_fb(data):
+            return 0 <= data <= 500
 
-        def is_valid_steer_angle_speed_actual(value):
-            return 0 <= value <= 255
+        def validate_set_steering_angle_speed_fb(data):
+            return 0 <= data <= 15
 
-        steer_en_state = struct.unpack('>B', data[0:1])[0] & 0b00000011
-        steer_flt1 = struct.unpack('>B', data[1:2])[0]
-        steer_flt2 = struct.unpack('>B', data[2:3])[0]
-        steer_angle_actual = struct.unpack('>H', data[3:5])[0] - 500
-        steer_angle_speed_actual = struct.unpack('>B', data[7:8])[0]
+        def validate_data_vcu_cycle_count(data):
+            return 0 <= data <= 15
+
+        steering_en_state = struct.unpack('<B', data[0:1])[0] & 0b00000001
+        steering_control_out_of_bounds_reminder = (struct.unpack('<B', data[0:1])[0] >> 1) & 0b00000001
+        steering_mode_fb = (struct.unpack('<B', data[0:1])[0] >> 4) & 0b00001111
+        front_steering_angle_fb = struct.unpack('<h', data[1:3])[0]
+        rear_steering_angle_fb = struct.unpack('<h', data[3:5])[0]
+        set_steering_angle_speed_fb = struct.unpack('<B', data[5:6])[0] * 2
+        vcu_cycle_count = struct.unpack('<B', data[6:7])[0] & 0b00001111
+
         parsed_data = dict()
-        parsed_data['steer_en_state'] = steer_en_state if is_valid_steer_en_state(steer_en_state) else 0
-        parsed_data['steer_flt1'] = steer_flt1 if is_valid_steer_flt1(steer_flt1) else 0
-        parsed_data['steer_flt2'] = steer_flt2 if is_valid_steer_flt2(steer_flt2) else 0
-        parsed_data['steer_angle_actual'] = steer_angle_actual if is_valid_steer_angle_actual(steer_angle_actual) else 0
-        parsed_data['steer_angle_speed_actual'] = steer_angle_speed_actual if is_valid_steer_angle_speed_actual(
-            steer_angle_speed_actual) else 0
+        parsed_data['steering_en_state'] = steering_en_state if validate_steering_en_state(steering_en_state) else 0
+        parsed_data['steering_control_out_of_bounds_reminder'] = steering_control_out_of_bounds_reminder \
+            if validate_steering_control_out_of_bounds_reminder(steering_control_out_of_bounds_reminder) else 0
+        parsed_data['steering_mode_fb'] = steering_mode_fb if validate_steering_mode_fb(steering_mode_fb) else 0
+        parsed_data['front_steering_angle_fb'] = front_steering_angle_fb \
+            if validate_front_steering_angle_fb(front_steering_angle_fb) else 0
+        parsed_data['rear_steering_angle_fb'] = rear_steering_angle_fb \
+            if validate_rear_steering_angle_fb(rear_steering_angle_fb) else 0
+        parsed_data['set_steering_angle_speed_fb'] = set_steering_angle_speed_fb \
+            if validate_set_steering_angle_speed_fb(set_steering_angle_speed_fb) else 0
+        parsed_data['vcu_cycle_count'] = vcu_cycle_count \
+            if validate_data_vcu_cycle_count(vcu_cycle_count) else 0
+        return parsed_data
+
+    @staticmethod
+    def parsing_can_data_vehicle_work_sta_fb(data):
+        def validate_drive_mode_fb(data):
+            return 0 <= data <= 3
+
+        def validate_vehicle_power_on_status_fb(data):
+            return 0 <= data <= 3
+
+        def validate_dc_working_status(data):
+            return 0 <= data <= 2
+
+        def validate_vehicle_speed_limit_status(data):
+            return 0 <= data <= 1
+
+        def validate_vehicle_speed_limit_val_fb(data):
+            return 0 <= data <= 50
+
+        def validate_low_voltage_battery_voltage(data):
+            return 0 <= data <= 25
+
+        def validate_emergency_stop_status_fb(data):
+            return 0 <= data <= 3
+
+        def validate_vehicle_power_battery(data):
+            return 0 <= data <= 1
+
+        def validate_vehicle_rear_crash_sensor_feedback(data):
+            return 0 <= data <= 1
+
+        def validate_vcu_cycle_count(data):
+            return 0 <= data <= 15
+
+        drive_mode_fb = struct.unpack('<B', data[0:1])[0] & 0b00000011
+        vehicle_power_on_status_fb = (struct.unpack('<B', data[0:1])[0] >> 2) & 0b00000011
+        dc_working_status = (struct.unpack('<B', data[0:1])[0] >> 4) & 0b00000011
+        vehicle_speed_limit_status = struct.unpack('<B', data[1:2])[0] & 0b00000001
+        vehicle_speed_limit_val_fb = struct.unpack('<H', data[2:4])[0] * 0.1
+        low_voltage_battery_voltage = struct.unpack('<B', data[4:5])[0] * 0.1
+        emergency_stop_status_fb = struct.unpack('<B', data[5:6])[0] & 0b00001111
+        vehicle_power_battery = (struct.unpack('<B', data[5:6])[0] >> 4) & 0b00000001
+        vehicle_rear_crash_sensor_feedback = (struct.unpack('<B', data[5:6])[0] >> 5) & 0b00000001
+        vcu_cycle_count = struct.unpack('<B', data[6:7])[0] & 0b00001111
+        vcu_checksum = struct.unpack('<B', data[7:8])[0]
+
+        parsed_data = dict()
+        parsed_data['drive_mode_fb'] = drive_mode_fb \
+            if validate_drive_mode_fb(drive_mode_fb) else 0
+        parsed_data['vehicle_power_on_status_fb'] = vehicle_power_on_status_fb \
+            if validate_vehicle_power_on_status_fb(vehicle_power_on_status_fb) else 0
+        parsed_data['dc_working_status'] = dc_working_status \
+            if validate_dc_working_status(dc_working_status) else 0
+        parsed_data['vehicle_speed_limit_status'] = vehicle_speed_limit_status \
+            if validate_vehicle_speed_limit_status(vehicle_speed_limit_status) else 0.0
+        parsed_data['vehicle_speed_limit_val_fb'] = vehicle_speed_limit_val_fb \
+            if validate_vehicle_speed_limit_val_fb(vehicle_speed_limit_val_fb) else 0
+        parsed_data['low_voltage_battery_voltage'] = low_voltage_battery_voltage \
+            if validate_low_voltage_battery_voltage(low_voltage_battery_voltage) else 0.0
+        parsed_data['emergency_stop_status_fb'] = emergency_stop_status_fb \
+            if validate_emergency_stop_status_fb(emergency_stop_status_fb) else 0
+        parsed_data['vehicle_power_battery'] = vehicle_power_battery \
+            if validate_vehicle_power_battery(vehicle_power_battery) else 0
+        parsed_data['vehicle_rear_crash_sensor_feedback'] = vehicle_rear_crash_sensor_feedback \
+            if validate_vehicle_rear_crash_sensor_feedback(vehicle_rear_crash_sensor_feedback) else 0
+        parsed_data['vcu_cycle_count'] = vcu_cycle_count \
+            if validate_vcu_cycle_count(vcu_cycle_count) else 0
+        parsed_data['vcu_checksum'] = vcu_checksum
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_gear_report(data):
-        def is_valid_gear_actual(value):
-            return 0 <= value <= 4
+    def parsing_can_data_power_sta_fb(data):
+        def validate_vehicle_charge_status(data):
+            return 0 <= data <= 2
 
-        def is_valid_gear_flt(value):
-            return 0 <= value <= 1
+        def validate_vehicle_power_battery_electricity_amount(data):
+            return 0 <= data <= 100
 
-        gear_actual = struct.unpack('>B', data[0:1])[0] & 0b00000111
-        gear_flt = struct.unpack('>B', data[1:2])[0]
+        def validate_vehicle_power_battery_voltage(data):
+            return 0 <= data <= 1000
+
+        def validate_vehicle_power_battery_current(data):
+            return -1000 <= data <= 1000
+
+        def validate_bms_maximum_monomer_temperature(data):
+            return -40 <= data <= 80
+
+        vehicle_charge_status = (struct.unpack('<B', data[0:1])[0] >> 4) & 0b00000011
+        vehicle_power_battery_electricity_amount = struct.unpack('<B', data[1:2])[0]
+        vehicle_power_battery_voltage = (struct.unpack('<B', data[2:4])[0] * 0.1) - 1000
+        vehicle_power_battery_current = (struct.unpack('<B', data[4:6])[0] * 0.1) - 40
+        bms_maximum_monomer_temperature = struct.unpack('<B', data[6:7])[0]
 
         parsed_data = dict()
-        parsed_data['gear_actual'] = gear_actual if is_valid_gear_actual(gear_actual) else 0
-        parsed_data['gear_flt'] = gear_flt if is_valid_gear_flt(gear_flt) else 0
+        parsed_data['parking_actual'] = vehicle_charge_status \
+            if validate_vehicle_charge_status(vehicle_charge_status) else 0
+        parsed_data['parking_actual'] = vehicle_power_battery_electricity_amount \
+            if validate_vehicle_power_battery_electricity_amount(vehicle_power_battery_electricity_amount) else 0
+        parsed_data['parking_actual'] = vehicle_power_battery_voltage \
+            if validate_vehicle_power_battery_voltage(vehicle_power_battery_voltage) else 0.0
+        parsed_data['parking_actual'] = vehicle_power_battery_current \
+            if validate_vehicle_power_battery_current(vehicle_power_battery_current) else 0.0
+        parsed_data['parking_actual'] = bms_maximum_monomer_temperature \
+            if validate_bms_maximum_monomer_temperature(bms_maximum_monomer_temperature) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_park_report(data):
-        def is_valid_parking_actual(value):
-            return 0 <= value <= 1
+    def parsing_can_data_vehicle_sta_fb(data):
+        def validate_status_fb(data):
+            return 0 <= data <= 1
 
-        def is_valid_park_flt(value):
-            return 0 <= value <= 1
-
-        parking_actual = struct.unpack('>B', data[0:1])[0] & 0b00000001
-        park_flt = struct.unpack('>B', data[1:2])[0]
+        position_light_status_fb = struct.unpack('<B', data[0:1])[0] & 0b00000001
+        low_light_status_fb = (struct.unpack('<B', data[0:1])[0] >> 1) & 0b00000001
+        left_turning_light_status_fb = (struct.unpack('<B', data[0:1])[0] >> 2) & 0b00000001
+        light_turning_light_status_fb = (struct.unpack('<B', data[0:1])[0] >> 3) & 0b00000001
+        hazard_warning_light_switch_status = (struct.unpack('<B', data[0:1])[0] >> 6) & 0b00000001
 
         parsed_data = dict()
-        parsed_data['parking_actual'] = parking_actual if is_valid_parking_actual(parking_actual) else 0
-        parsed_data['park_flt'] = park_flt if is_valid_park_flt(park_flt) else 0
+        parsed_data['position_light_status_fb'] = position_light_status_fb \
+            if validate_status_fb(position_light_status_fb) else 0
+
+        parsed_data['low_light_status_fb'] = low_light_status_fb \
+            if validate_status_fb(low_light_status_fb) else 0
+
+        parsed_data['left_turning_light_status_fb'] = left_turning_light_status_fb \
+            if validate_status_fb(left_turning_light_status_fb) else 0
+
+        parsed_data['light_turning_light_status_fb'] = light_turning_light_status_fb \
+            if validate_status_fb(light_turning_light_status_fb) else 0
+
+        parsed_data['hazard_warning_light_switch_status'] = hazard_warning_light_switch_status \
+            if validate_status_fb(hazard_warning_light_switch_status) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_vcu_report(data):
+    def parsing_can_data_vehicle_flt_sta_fb(data):
+        def validate_motor_system_overheating(data):
+            return 0 <= data <= 1
 
-        def is_valid_steer_mode_stst(value):
-            return 0 <= value <= 2
+        def validate_battery_system_overheating(data):
+            return 0 <= data <= 1
 
-        def is_valid_brake_light_actual(value):
-            return 0 <= value <= 1
+        def validate_brake_system_overheating(data):
+            return 0 <= data <= 1
 
-        def is_valid_acc(value):
-            return -10 <= value <= 10
+        def validate_steering_system_overheating(data):
+            return 0 <= data <= 1
 
-        def is_valid_speed(value):
-            return -32.768 <= value <= 32.768
+        def validate_battery_voltage_is_too_low(data):
+            return 0 <= data <= 1
 
-        def is_valid_aeb_state(value):
-            return 0 <= value <= 1
+        def validate_system_error(data):
+            return 0 <= data <= 4
 
-        def is_valid_front_crash_state(value):
-            return 0 <= value <= 1
+        def validate_brake_system_failure(data):
+            return 0 <= data <= 4
 
-        def is_valid_back_crash_state(value):
-            return 0 <= value <= 1
+        def validate_parking_system_failure(data):
+            return 0 <= data <= 4
 
-        def is_valid_vehicle_mode_state(value):
-            return 0 <= value <= 3
+        def validate_front_steering_system_fault(data):
+            return 0 <= data <= 4
 
-        def is_valid_driver_mode_state(value):
-            return 0 <= value <= 7
+        def validate_rear_steering_system_failure(data):
+            return 0 <= data <= 4
 
-        def is_valid_chassis_errcode(value):
-            return 0 <= value <= 255
+        def validate_left_front_motor_system_failure(data):
+            return 0 <= data <= 4
 
-        def is_valid_turn_light_actual(value):
-            return 0 <= value <= 4
+        def validate_right_front_motor_system_failure(data):
+            return 0 <= data <= 4
 
-        steer_mode_stst = struct.unpack('>B', data[1:2])[0] & 0b00000111
+        def validate_left_rear_motor_system_failure(data):
+            return 0 <= data <= 4
 
-        brake_light_actual = 1 if ((struct.unpack('>B', data[1:2])[0] & 0b00001000) > 0) else 0
+        def validate_right_rear_motor_system_failure(data):
+            return 0 <= data <= 4
 
-        acc = (struct.unpack('>b', data[0:1])[0] | struct.unpack('>b', data[1:2])[0] & 0b11110000) * 0.001
+        def validate_bms_system_failure(data):
+            return 0 <= data <= 4
 
-        speed = struct.unpack('>h', data[2:4])[0] * 0.001
-        aeb_state = struct.unpack('>B', data[4:5])[0] & 0b00000001
-        front_crash_state = struct.unpack('>B', data[4:5])[0] & 0b00000010
-        back_crash_state = struct.unpack('>B', data[4:5])[0] & 0b00000100
-        vehicle_mode_state = (struct.unpack('>B', data[4:5])[0] >> 3) & 0b00000011
-        driver_mode_state = (struct.unpack('>B', data[4:5])[0] >> 5) & 0b00000111
-        chassis_errcode = struct.unpack('>B', data[5:6])[0]
-        turn_light_actual = struct.unpack('>B', data[7:8])[0] & 0b00000011
+        def validate_dc_system_failure(data):
+            return 0 <= data <= 4
+
+        motor_system_overheating = struct.unpack('<B', data[0:1])
+        battery_system_overheating = struct.unpack('<B', data[0:1])
+        brake_system_overheating = struct.unpack('<B', data[0:1])
+        steering_system_overheating = struct.unpack('<B', data[0:1])
+        battery_voltage_is_too_low = struct.unpack('<B', data[0:1])
+        system_error = struct.unpack('<B', data[1:2])
+        brake_system_failure = struct.unpack('<B', data[1:2])
+        parking_system_failure = struct.unpack('<B', data[2:3])
+        front_steering_system_fault = struct.unpack('<B', data[2:3])
+        rear_steering_system_failure = struct.unpack('<B', data[3:4])
+        left_front_motor_system_failure = struct.unpack('<B', data[3:4])
+        right_front_motor_system_failure = struct.unpack('<B', data[4:5])
+        left_rear_motor_system_failure = struct.unpack('<B', data[4:5])
+        right_rear_motor_system_failure = struct.unpack('<B', data[5:6])
+        bms_system_failure = struct.unpack('<B', data[5:6])
+        dc_system_failure = struct.unpack('<B', data[6:7])
 
         parsed_data = dict()
-        parsed_data['steer_mode_sts'] = steer_mode_stst if is_valid_steer_mode_stst(steer_mode_stst) else 0
-        parsed_data['brake_light_actual'] = brake_light_actual if is_valid_brake_light_actual(brake_light_actual) else 0
-        parsed_data['acc'] = acc if is_valid_acc(acc) else 0.0
-        parsed_data['speed'] = speed if is_valid_speed(speed) else 0.0
-        parsed_data['aeb_state'] = aeb_state if is_valid_aeb_state(aeb_state) else 0
-        parsed_data['front_crash_state'] = front_crash_state if is_valid_front_crash_state(front_crash_state) else 0
-        parsed_data['back_crash_state'] = back_crash_state if is_valid_back_crash_state(back_crash_state) else 0
-        parsed_data['vehicle_mode_state'] = vehicle_mode_state if is_valid_vehicle_mode_state(vehicle_mode_state) else 0
-        parsed_data['driver_mode_state'] = driver_mode_state if is_valid_driver_mode_state(driver_mode_state) else 0
-        parsed_data['chassis_errcode'] = chassis_errcode if is_valid_chassis_errcode(chassis_errcode) else 0
-        parsed_data['turn_light_actual'] = turn_light_actual if is_valid_turn_light_actual(turn_light_actual) else 0
+        parsed_data['motor_system_overheating'] = motor_system_overheating \
+            if validate_motor_system_overheating(motor_system_overheating) else 0
+        parsed_data['battery_system_overheating'] = battery_system_overheating \
+            if validate_battery_system_overheating(battery_system_overheating) else 0
+        parsed_data['brake_system_overheating'] = brake_system_overheating \
+            if validate_brake_system_overheating(brake_system_overheating) else 0
+        parsed_data['steering_system_overheating'] = steering_system_overheating \
+            if validate_steering_system_overheating(steering_system_overheating) else 0
+        parsed_data['battery_voltage_is_too_low'] = battery_voltage_is_too_low \
+            if validate_battery_voltage_is_too_low(battery_voltage_is_too_low) else 0
+        parsed_data['system_error'] = system_error \
+            if validate_system_error(system_error) else 0
+        parsed_data['brake_system_failure'] = brake_system_failure \
+            if validate_brake_system_failure(brake_system_failure) else 0
+        parsed_data['parking_system_failure'] = parking_system_failure \
+            if validate_parking_system_failure(parking_system_failure) else 0
+        parsed_data['front_steering_system_fault'] = front_steering_system_fault \
+            if validate_front_steering_system_fault(front_steering_system_fault) else 0
+        parsed_data['rear_steering_system_failure'] = rear_steering_system_failure \
+            if validate_rear_steering_system_failure(rear_steering_system_failure) else 0
+        parsed_data['left_front_motor_system_failure'] = left_front_motor_system_failure \
+            if validate_left_front_motor_system_failure(left_front_motor_system_failure) else 0
+        parsed_data['right_front_motor_system_failure'] = right_front_motor_system_failure \
+            if validate_right_front_motor_system_failure(right_front_motor_system_failure) else 0
+        parsed_data['left_rear_motor_system_failure'] = left_rear_motor_system_failure \
+            if validate_left_rear_motor_system_failure(left_rear_motor_system_failure) else 0
+        parsed_data['right_rear_motor_system_failure'] = right_rear_motor_system_failure \
+            if validate_right_rear_motor_system_failure(right_rear_motor_system_failure) else 0
+        parsed_data['bms_system_failure'] = bms_system_failure \
+            if validate_bms_system_failure(bms_system_failure) else 0
+        parsed_data['dc_system_failure'] = dc_system_failure \
+            if validate_dc_system_failure(dc_system_failure) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_wheel_speed_report(data):
-        def is_valid_fl(value):
-            return 0 <= value <= 65.535
+    def parsing_can_data_chassis_wheel_rpm_fb(data):
+        def validate_left_front_wheel_speed(data):
+            return -2000 <= data <= 2000
 
-        def is_valid_fr(value):
-            return 0 <= value <= 65.535
+        def validate_right_front_wheel_speed(data):
+            return -2000 <= data <= 2000
 
-        def is_valid_rl(value):
-            return 0 <= value <= 65.535
+        def validate_left_rear_wheel_speed(data):
+            return -2000 <= data <= 2000
 
-        def is_valid_rr(value):
-            return 0 <= value <= 65.535
+        def validate_right_rear_wheel_speed(data):
+            return -2000 <= data <= 2000
 
-        fl = struct.unpack('>H', data[0:2])[0] * 0.001
-        fr = struct.unpack('>H', data[2:4])[0] * 0.001
-        rl = struct.unpack('>H', data[4:6])[0] * 0.001
-        rr = struct.unpack('>H', data[6:8])[0] * 0.001
+        left_front_wheel_speed = struct.unpack('<h', data[0:2])
+        right_front_wheel_speed = struct.unpack('<h', data[2:4])
+        left_rear_wheel_speed = struct.unpack('<h', data[4:6])
+        right_rear_wheel_speed = struct.unpack('<h', data[6:8])
 
         parsed_data = dict()
-        parsed_data['fl'] = fl if is_valid_fl(fl) else 0.0
-        parsed_data['fr'] = fr if is_valid_fr(fr) else 0.0
-        parsed_data['rl'] = rl if is_valid_rl(rl) else 0.0
-        parsed_data['rr'] = rr if is_valid_rr(rr) else 0.0
+        parsed_data['left_front_wheel_speed'] = left_front_wheel_speed \
+            if validate_left_front_wheel_speed(left_front_wheel_speed) else 0
+        parsed_data['right_front_wheel_speed'] = right_front_wheel_speed \
+            if validate_right_front_wheel_speed(right_front_wheel_speed) else 0
+        parsed_data['left_rear_wheel_speed'] = left_rear_wheel_speed \
+            if validate_left_rear_wheel_speed(left_rear_wheel_speed) else 0
+        parsed_data['right_rear_wheel_speed'] = right_rear_wheel_speed \
+            if validate_right_rear_wheel_speed(right_rear_wheel_speed) else 0
 
         return parsed_data
 
     @staticmethod
-    def parsing_can_data_bms_report(data):
-        def is_valid_battery_voltage(value):
-            return 0 <= value <= 300
+    def parsing_can_data_chassis_wheel_torque_fb(data):
 
-        def is_valid_battery_current(value):
-            return -3200 <= value <= 3353.5
+        def validate_left_front_wheel_torque(data):
+            return -200 <= data <= 200
 
-        def is_valid_battery_soc(value):
-            return 0 <= value <= 100
+        def validate_right_front_wheel_torque(data):
+            return -200 <= data <= 200
 
-        battery_voltage = struct.unpack('>H', data[0:2])[0] * 0.01
-        battery_current = (struct.unpack('>H', data[2:4])[0] * 0.1) - 3200
-        battery_soc = struct.unpack('>B', data[4:5])[0]
+        def validate_left_rear_wheel_torque(data):
+            return -200 <= data <= 200
+
+        def validate_right_rear_wheel_torque(data):
+            return -200 <= data <= 200
+
+        left_front_wheel_torque = struct.unpack('<h', data[0:2]) * 0.1
+        right_front_wheel_torque = struct.unpack('<h', data[2:4]) * 0.1
+        left_rear_wheel_torque = struct.unpack('<h', data[4:6]) * 0.1
+        right_rear_wheel_torque = struct.unpack('<h', data[6:8]) * 0.1
 
         parsed_data = dict()
-        parsed_data['battery_voltage'] = battery_voltage if is_valid_battery_voltage(battery_voltage) else 0.0
-        parsed_data['battery_current'] = battery_current if is_valid_battery_current(battery_current) else 0
-        parsed_data['battery_soc'] = battery_soc if is_valid_battery_soc(battery_soc) else 0
+        parsed_data['left_front_wheel_torque'] = left_front_wheel_torque \
+            if validate_left_front_wheel_torque(left_front_wheel_torque) else 0
+        parsed_data['right_front_wheel_torque'] = right_front_wheel_torque \
+            if validate_right_front_wheel_torque(right_front_wheel_torque) else 0
+        parsed_data['left_rear_wheel_torque'] = left_rear_wheel_torque \
+            if validate_left_rear_wheel_torque(left_rear_wheel_torque) else 0
+        parsed_data['right_rear_wheel_torque'] = right_rear_wheel_torque \
+            if validate_right_rear_wheel_torque(right_rear_wheel_torque) else 0
 
         return parsed_data
 

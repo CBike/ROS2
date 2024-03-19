@@ -13,10 +13,10 @@ int8 dc_working_status 0
 int8 vehicle_speed_limit_status 0
 
 # [m/s] [0|50] Current speed limit value feedback, which can be set by autonomous driving in autonomous driving mode.
-int8 vehicle_speed_limit_val_fb 0
+float32 vehicle_speed_limit_val_fb 0.0
 
 # [V] [0|25] When the voltage is too low, you need to drive carefully
-int8 low_voltage_battery_voltage 0
+float32 low_voltage_battery_voltage 0.0
 
 # [] [0|3] 0:no 1:chassis estop 2:remote estop 3:chassis err estop
 int8 emergency_stop_status_fb 0

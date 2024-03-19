@@ -7,7 +7,7 @@ int8 vehicle_brake_control_Enable 0
 int8 vehicle_brake_light_control 0
 
 # [%] [0|100] Brake control 0~100%, representing 0~maximum brake pressure control
-int8 vehicle_brake_control 0
+float32 vehicle_brake_control 0.0
 
 # [] [0|2] 0:default 1:brake 2:release
 int8 parking_control 0

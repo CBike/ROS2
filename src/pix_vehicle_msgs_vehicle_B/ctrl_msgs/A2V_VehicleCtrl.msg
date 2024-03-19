@@ -16,7 +16,7 @@ int8 right_turn_light control 0
 int8 speed_limit_control 0
 
 # [m/s] [1|20] Speed limit value, the maximum value does not exceed the speed limit value of the chassis software
-int8 speed_limit 1
+float32 speed_limit 1.0
 
 # [] [0|1] (reserved) 0:enable 1:disable
 int8 check_mode_enable 0

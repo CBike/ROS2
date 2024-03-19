@@ -10,10 +10,10 @@ int8 drive_mode_control 0
 int8 gear_control 0
 
 # [m/s] [0|50] It is valid in speed mode, and the chassis is controlled by sending speed commands
-int8 vehicle_speed_control 0
+float32 vehicle_speed_control 0.00
 
 # [%] [0|100] It is valid in torque mode, and the chassis is controlled by sending the throttle opening value
-int8 vehicle_throttle_control 0
+float32 vehicle_throttle_control 0.0
 
 # [] [0|15] Add 1 for each cycle, 0~15 cycles
 int8 cycle_count 0

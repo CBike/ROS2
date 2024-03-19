@@ -2,7 +2,7 @@ from rclpy.node import Node
 from std_msgs.msg import Header
 from can_utils.can_receiver import CANReceiver
 from pix_vehicle_msgs.msg import (BmsReport, BrakeReport, GearReport, ParkReport, SteerReport,
-                                 ThrottleReport, VcuReport, WheelSpeedReport)
+                                  ThrottleReport, VcuReport, WheelSpeedReport)
 import rclpy
 
 
@@ -25,7 +25,8 @@ class CANReceiverNode(Node):
         self.gear_report_publisher = self.create_publisher(GearReport, 'pix_vehicle_report/gear_report', 10)
         self.park_report_publisher = self.create_publisher(ParkReport, 'pix_vehicle_report/park_report', 10)
         self.vcu_report_publisher = self.create_publisher(VcuReport, 'pix_vehicle_report/vcu_report', 10)
-        self.wheel_speed_report_publisher = self.create_publisher(WheelSpeedReport, 'pix_vehicle_report/wheel_speed', 10)
+        self.wheel_speed_report_publisher = self.create_publisher(WheelSpeedReport, 'pix_vehicle_report/wheel_speed',
+                                                                  10)
         self.bms_report_publisher = self.create_publisher(BmsReport, 'pix_vehicle_report/bms_report', 10)
 
         self.throttle_report_timer = self.create_timer(0.02, self.pub_throttle_report)

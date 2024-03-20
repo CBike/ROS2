@@ -18,19 +18,15 @@ class SteerCtrlData:
         for field in fields(self):
             if field.name in kwargs:
                 value = kwargs[field.name]
-                if field.name == "vehicle_steering_control_enable" and not self.validate_vehicle_steering_control_enable(
-                        value):
+                if field.name == "vehicle_steering_control_enable" and not self.validate_vehicle_steering_control_enable(value):
                     value = 0
                 elif field.name == "steering_mode_control" and not self.validate_steering_mode_control(value):
                     value = 0
-                elif field.name == "vehicle_steering_control_front" and not self.validate_vehicle_steering_control_front(
-                        value):
+                elif field.name == "vehicle_steering_control_front" and not self.validate_vehicle_steering_control_front(value):
                     value = 0
-                elif field.name == "vehicle_steering_control_rear" and not self.validate_vehicle_steering_control_rear(
-                        value):
+                elif field.name == "vehicle_steering_control_rear" and not self.validate_vehicle_steering_control_rear(value):
                     value = 0
-                elif field.name == "vehicle_steering_wheel_speed_control" and not self.validate_vehicle_steering_wheel_speed_control(
-                        value):
+                elif field.name == "vehicle_steering_wheel_speed_control" and not self.validate_vehicle_steering_wheel_speed_control(value):
                     value = 0
                 setattr(self, field.name, value)
         self.last_update_time = time_ns()
@@ -61,10 +57,10 @@ class SteerCtrlData:
     def get_bytearray(self):
         vehicle_steering_control_enable = (self.vehicle_steering_control_enable, 0, 0)
         steering_mode_control = (self.steering_mode_control, 4, 7)
-        vehicle_steering_control_front_lower = (self.vehicle_steering_control_front, 8, 15)
-        vehicle_steering_control_front_upper = (self.vehicle_steering_control_front, 16, 23)
-        vehicle_steering_control_rear_lower = (self.vehicle_steering_control_rear, 24, 31)
-        vehicle_steering_control_rear_upper = (self.vehicle_steering_control_rear, 32, 39)
+        vehicle_steering_control_front_lower = (self.vehicle_steering_control_front & 0xFF, 8, 15)
+        vehicle_steering_control_front_upper = ((self.vehicle_steering_control_front >> 8) & 0xFF, 16, 23)
+        vehicle_steering_control_rear_lower = (self.vehicle_steering_control_rear & 0xFF, 24, 32)
+        vehicle_steering_control_rear_upper = ((self.vehicle_steering_control_rear >> 8) & 0xFF, 32, 39)
         vehicle_steering_wheel_speed_control = (self.vehicle_steering_wheel_speed_control / 2, 40, 47)
         cycle_count = (self.cycle_count, 48, 51)
 
@@ -83,16 +79,16 @@ class SteerCtrlData:
 
     @staticmethod
     def validate_steering_mode_control(val):
-        return 0 <= val <= 3
+        return 0 <= val <= 4
 
     @staticmethod
     def validate_vehicle_steering_control_front(val):
-        return 0 <= val <= 3
+        return -500 <= val <= 500
 
     @staticmethod
     def validate_vehicle_steering_control_rear(val):
-        return 0 <= val <= 50
+        return -500 <= val <= 500
 
     @staticmethod
     def validate_vehicle_steering_wheel_speed_control(val):
-        return 0 <= val <= 100
+        return 0 <= val <= 500

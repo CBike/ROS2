@@ -1,8 +1,8 @@
-def generate_byte_array(array_size: int, *args, checksum=False) -> bytearray:
+def generate_byte_array(array_size: int, *args, checksum: bool = False) -> bytearray:
     """Generates a bytearray filled with data extracted from arguments within specified bit ranges.
 
     Args:
-        checksum:
+        checksum: checksum option
         array_size (int): The size of the bytearray to be generated.
         *args: Variable length argument list. Each argument should be a tuple containing:
             - The data value (int).

@@ -17,7 +17,7 @@ class BrakeCtrlData:
         for field in fields(self):
             if field.name in kwargs:
                 value = kwargs[field.name]
-                if field.name == "vehicle_brake_control_enable" and not self.validate_vehicle_brake_control_Enable(
+                if field.name == "vehicle_brake_control_enable" and not self.validate_vehicle_brake_control_enable(
                         value):
                     value = 0
                 elif field.name == "vehicle_brake_light_control" and not self.validate_vehicle_brake_light_control(
@@ -44,7 +44,7 @@ class BrakeCtrlData:
     def reset_data(self):
 
         command_data = {
-            'vehicle_brake_control_Enable': 0,
+            'vehicle_brake_control_enable': 0,
             'vehicle_brake_light_control': 0,
             'vehicle_brake_control': 0.0,
             'parking_control': 0,
@@ -56,8 +56,10 @@ class BrakeCtrlData:
     def get_bytearray(self):
         vehicle_brake_control_enable = (self.vehicle_brake_control_enable, 0, 0)
         vehicle_brake_light_control = (self.vehicle_brake_light_control, 1, 1)
+
         vehicle_brake_control_lower = ((int(self.vehicle_brake_control / 0.1) >> 2) & 0xFF, 8, 15)
         vehicle_brake_control_upper = (int(self.vehicle_brake_control / 0.1) & 0b11, 16, 17)
+
         parking_control = (self.parking_control, 24, 25)
         cycle_count = (self.cycle_count, 48, 51)
 
@@ -68,7 +70,7 @@ class BrakeCtrlData:
                                        parking_control, cycle_count), checksum=True)
 
     @staticmethod
-    def validate_vehicle_brake_control_Enable(val):
+    def validate_vehicle_brake_control_enable(val):
         return 0 <= val <= 1
 
     @staticmethod

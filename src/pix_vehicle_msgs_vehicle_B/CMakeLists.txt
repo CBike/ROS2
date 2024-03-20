@@ -12,21 +12,21 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   # fb_msgs
-  "fb_msgs/V2A_BrakeStaFb.msg"
-  "fb_msgs/V2A_ChassisWheelRpmFb.msg"
-  "fb_msgs/V2A_ChassisWheelTorqueFb.msg"
-  "fb_msgs/V2A_DriveStaFb.msg"
-  "fb_msgs/V2A_PowerStaFb.msg"
-  "fb_msgs/V2A_SteerStaFb.msg"
-  "fb_msgs/V2A_VehicleFltStaFb.msg"
-  "fb_msgs/V2A_VehicleStaFb.msg"
-  "fb_msgs/V2A_VehicleWorkStaFb.msg"
+  "fb_msgs/V2ABrakeStaFb.msg"
+  "fb_msgs/V2AChassisWheelRpmFb.msg"
+  "fb_msgs/V2AChassisWheelTorqueFb.msg"
+  "fb_msgs/V2ADriveStaFb.msg"
+  "fb_msgs/V2APowerStaFb.msg"
+  "fb_msgs/V2ASteerStaFb.msg"
+  "fb_msgs/V2AVehicleFltStaFb.msg"
+  "fb_msgs/V2AVehicleStaFb.msg"
+  "fb_msgs/V2AVehicleWorkStaFb.msg"
   # Command msg
-  "ctrl_msgs/A2V_BrakeCtrl.msg"
-  "ctrl_msgs/A2V_DriveCtrl.msg"
-  "ctrl_msgs/A2V_SteerCtrl.msg"
-  "ctrl_msgs/A2V_VehicleCtrl.msg"
-  "ctrl_msgs/A2V_WheelTorqueCtrl.msg"
+  "ctrl_msgs/A2VBrakeCtrl.msg"
+  "ctrl_msgs/A2VDriveCtrl.msg"
+  "ctrl_msgs/A2VSteerCtrl.msg"
+  "ctrl_msgs/A2VVehicleCtrl.msg"
+  "ctrl_msgs/A2VWheelTorqueCtrl.msg"
 
   DEPENDENCIES std_msgs
  )

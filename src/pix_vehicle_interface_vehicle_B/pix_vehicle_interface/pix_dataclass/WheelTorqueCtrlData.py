@@ -57,14 +57,14 @@ class WheelTorqueCtrlData:
         right_rear_motor_torque_lower = (int(self.right_rear_motor_torque / 0.1) & 0xFF, 48, 55)
         right_rear_motor_torque_upper = ((int(self.right_rear_motor_torque / 0.1) >> 8) & 0xFF, 56, 63)
 
-        return generate_byte_array(8, (left_front_motor_torque_lower,
-                                       left_front_motor_torque_upper,
-                                       right_front_motor_torque_lower,
-                                       right_front_motor_torque_upper,
-                                       left_rear_motor_torque_lower,
-                                       left_rear_motor_torque_upper,
-                                       right_rear_motor_torque_lower,
-                                       right_rear_motor_torque_upper), checksum=False)
+        return generate_byte_array(8, left_front_motor_torque_lower,
+                                   left_front_motor_torque_upper,
+                                   right_front_motor_torque_lower,
+                                   right_front_motor_torque_upper,
+                                   left_rear_motor_torque_lower,
+                                   left_rear_motor_torque_upper,
+                                   right_rear_motor_torque_lower,
+                                   right_rear_motor_torque_upper, checksum=False)
 
     @staticmethod
     def validate_left_front_motor_torque(val):
@@ -81,5 +81,3 @@ class WheelTorqueCtrlData:
     @staticmethod
     def validate_right_rear_motor_torque(val):
         return -200 <= val <= 200
-
-

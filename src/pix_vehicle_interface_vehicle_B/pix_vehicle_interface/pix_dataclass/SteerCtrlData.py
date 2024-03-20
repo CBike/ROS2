@@ -18,15 +18,19 @@ class SteerCtrlData:
         for field in fields(self):
             if field.name in kwargs:
                 value = kwargs[field.name]
-                if field.name == "vehicle_steering_control_enable" and not self.validate_vehicle_steering_control_enable(value):
+                if field.name == "vehicle_steering_control_enable" and not self.validate_vehicle_steering_control_enable(
+                        value):
                     value = 0
                 elif field.name == "steering_mode_control" and not self.validate_steering_mode_control(value):
                     value = 0
-                elif field.name == "vehicle_steering_control_front" and not self.validate_vehicle_steering_control_front(value):
+                elif field.name == "vehicle_steering_control_front" and not self.validate_vehicle_steering_control_front(
+                        value):
                     value = 0
-                elif field.name == "vehicle_steering_control_rear" and not self.validate_vehicle_steering_control_rear(value):
+                elif field.name == "vehicle_steering_control_rear" and not self.validate_vehicle_steering_control_rear(
+                        value):
                     value = 0
-                elif field.name == "vehicle_steering_wheel_speed_control" and not self.validate_vehicle_steering_wheel_speed_control(value):
+                elif field.name == "vehicle_steering_wheel_speed_control" and not self.validate_vehicle_steering_wheel_speed_control(
+                        value):
                     value = 0
                 setattr(self, field.name, value)
         self.last_update_time = time_ns()
@@ -64,14 +68,14 @@ class SteerCtrlData:
         vehicle_steering_wheel_speed_control = (self.vehicle_steering_wheel_speed_control / 2, 40, 47)
         cycle_count = (self.cycle_count, 48, 51)
 
-        return generate_byte_array(8, (vehicle_steering_control_enable,
-                                       steering_mode_control,
-                                       vehicle_steering_control_front_lower,
-                                       vehicle_steering_control_front_upper,
-                                       vehicle_steering_control_rear_lower,
-                                       vehicle_steering_control_rear_upper,
-                                       vehicle_steering_wheel_speed_control,
-                                       cycle_count,), checksum=True)
+        return generate_byte_array(8, vehicle_steering_control_enable,
+                                   steering_mode_control,
+                                   vehicle_steering_control_front_lower,
+                                   vehicle_steering_control_front_upper,
+                                   vehicle_steering_control_rear_lower,
+                                   vehicle_steering_control_rear_upper,
+                                   vehicle_steering_wheel_speed_control,
+                                   cycle_count, checksum=True)
 
     @staticmethod
     def validate_vehicle_steering_control_enable(val):

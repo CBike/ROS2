@@ -64,13 +64,13 @@ class VehicleCtrlData:
         speed_limit = (self.speed_limit, 32, 39)
         check_mode_enable = (self.check_mode_enable, 48, 48)
 
-        return generate_byte_array(8, (position_light_control,
-                                       low_light_control,
-                                       left_turn_light_control,
-                                       right_turn_light_control,
-                                       speed_limit_control,
-                                       speed_limit,
-                                       check_mode_enable), checksum=False)
+        return generate_byte_array(8, position_light_control,
+                                   low_light_control,
+                                   left_turn_light_control,
+                                   right_turn_light_control,
+                                   speed_limit_control,
+                                   speed_limit,
+                                   check_mode_enable, checksum=False)
 
     @staticmethod
     def validate_position_light_control(val):

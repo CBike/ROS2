@@ -58,53 +58,28 @@ def print_byte_array(byte_array):
         chunk_ascii = ascii_string[i:i + 16]
         print(f"{chunk_hex.ljust(48)} {chunk_ascii}")
 
+
+
 if __name__ == '__main__':
-    throttle_en_ctrl = (1, 0, 0)
+    vehicle_brake_control_enable = 0
+    vehicle_brake_light_control = 0
+    vehicle_brake_control = 0
+    parking_control = 2
+    cycle_count = 15
+    vehicle_brake_control_enable = (vehicle_brake_control_enable, 0, 0)
+    vehicle_brake_light_control = (vehicle_brake_light_control, 1, 1)
 
-    throttle_acc = 1.0 / 0.01
+    vehicle_brake_control_lower = ((int(vehicle_brake_control / 0.1) << 2) & 0xFF, 8, 15)
+    vehicle_brake_control_upper = (int(vehicle_brake_control / 0.1) & 0b11, 16, 17)
 
-    throttle_acc_upper_byte = (((int(throttle_acc) >> 2) & 0xFF), 8, 15)
-    throttle_acc_lower_byte = ((int(throttle_acc) & 0b11), 22, 33)
+    parking_control = (parking_control, 24, 25)
+    cycle_count = (cycle_count, 48, 51)
 
-    throttle_pedal_target = 10.0 / 0.1
-    throttle_pedal_target_upper_byte = (((int(throttle_pedal_target) >> 8) & 0xFF), 24, 31)
-    throttle_pedal_target_lower_byte = ((int(throttle_pedal_target) & 0xFF), 32, 39)
+    ret = generate_byte_array(8, vehicle_brake_control_enable,
+                                  vehicle_brake_light_control,
+                                  vehicle_brake_control_lower,
+                                  vehicle_brake_control_upper,
+                                  parking_control,
+                                  cycle_count, checksum=True)
+    print(f'brake control: {ret}')
 
-    vel_target = 10.23 / 0.01
-    throttle_vel_target_upper_byte = (((int(vel_target) >> 2) & 0xFF), 40, 47)
-    throttle_vel_target_lower_byte = ((int(vel_target) & 0b11), 54, 55)
-
-    steer_en_ctrl = (1, 0, 0)
-    steer_angle_spd = (125, 8, 15)
-    steer_angle_target_upper_data = ((((0 + 500) >> 8) & 0xFF), 24, 31)
-    steer_angle_target_lower_data = (((0 + 500) & 0xFF), 32, 39)
-
-    aeb_en_ctrl = (1, 1, 1)
-    brake_en_ctrl = (1, 0, 0)
-    brake_dec = 0.1 / 0.01
-    brake_pedal_target = 10.0 / 0.1
-    brake_dec_upper_byte = (((int(brake_dec) >> 2) & 0xFF), 8, 15)
-    brake_dec_lower_byte = ((int(brake_dec) & 0b11), 22, 23)
-    brake_pedal_target_upper_byte = (((int(brake_pedal_target) >> 8) & 0xFF), 24, 31)
-    brake_pedal_target_lower_byte = ((int(brake_pedal_target) & 0xFF), 32, 39)
-
-    print(f'brake_pedal_target : {brake_pedal_target}')
-    print(f'brake_dec : {brake_dec}')
-
-    gear_en_ctrl = (1, 0, 0)
-    gear_target = (4, 8, 10)
-
-    park_en_ctrl = (1, 0, 0)
-    park_target = (1, 8, 8)
-
-    steer_mode_ctrl = (2, 0, 2)
-    drive_mode_ctrl = (0, 8, 10)
-    turn_light_ctrl = (3, 16, 17)
-
-    ret = generate_byte_array(8, gear_en_ctrl, gear_target)
-    print_byte_array(ret)
-
-    # for i in range(1, 256):
-    #     checksum = (i, 56, 63)
-    #     ret = generate_byte_array(8, checksum)
-    #     print_byte_array(ret)

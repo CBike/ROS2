@@ -45,14 +45,14 @@ class WheelTorqueCtrlData:
         self.update_value(**command_data)
 
     def get_bytearray(self):
-        left_front_motor_torque_lower = (self.left_front_motor_torque, 0, 7)
-        left_front_motor_torque_upper = (self.left_front_motor_torque, 8, 15)
-        right_front_motor_torque_lower = (self.right_front_motor_torque, 16, 23)
-        right_front_motor_torque_upper = (self.right_front_motor_torque, 24, 31)
-        left_rear_motor_torque_lower = (self.left_rear_motor_torque, 32, 39)
-        left_rear_motor_torque_upper = (self.left_rear_motor_torque, 40, 47)
-        right_rear_motor_torque_lower = (self.right_rear_motor_torque, 48, 55)
-        right_rear_motor_torque_upper = (self.right_rear_motor_torque, 56, 63)
+        left_front_motor_torque_lower = ((int(self.left_front_motor_torque / 0.1) >> 8) & 0xFF, 0, 7)
+        left_front_motor_torque_upper = (int(self.left_front_motor_torque / 0.1) & 0xFF, 8, 15)
+        right_front_motor_torque_lower = ((int(self.right_front_motor_torque / 0.1) >> 8) & 0xFF, 16, 23)
+        right_front_motor_torque_upper = (int(self.right_front_motor_torque / 0.1) & 0xFF, 24, 31)
+        left_rear_motor_torque_lower = ((int(self.left_rear_motor_torque / 0.1) >> 8) & 0xFF, 32, 39)
+        left_rear_motor_torque_upper = (int(self.left_rear_motor_torque / 0.1) & 0xFF, 40, 47)
+        right_rear_motor_torque_lower = ((int(self.right_rear_motor_torque / 0.1) >> 8) & 0xFF, 48, 55)
+        right_rear_motor_torque_upper = (int(self.right_rear_motor_torque / 0.1) & 0xFF, 56, 63)
 
         return generate_byte_array(8, (left_front_motor_torque_lower,
                                        left_front_motor_torque_upper,

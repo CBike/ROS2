@@ -11,22 +11,22 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  # Report msg
-  "report_msgs/BmsReport.msg"
-  "report_msgs/BrakeReport.msg"
-  "report_msgs/GearReport.msg"
-  "report_msgs/ParkReport.msg"
-  "report_msgs/SteerReport.msg"
-  "report_msgs/ThrottleReport.msg"
-  "report_msgs/VcuReport.msg"
-  "report_msgs/WheelSpeedReport.msg"
+  # fb_msgs
+  "fb_msgs/V2A_BrakeStaFb.msg"
+  "fb_msgs/V2A_ChassisWheelRpmFb.msg"
+  "fb_msgs/V2A_ChassisWheelTorqueFb.msg"
+  "fb_msgs/V2A_DriveStaFb.msg"
+  "fb_msgs/V2A_PowerStaFb.msg"
+  "fb_msgs/V2A_SteerStaFb.msg"
+  "fb_msgs/V2A_VehicleFltStaFb.msg"
+  "fb_msgs/V2A_VehicleStaFb.msg"
+  "fb_msgs/V2A_VehicleWorkStaFb.msg"
   # Command msg
-  "command_msgs/ThrottleCommand.msg"
-  "command_msgs/BrakeCommand.msg"
-  "command_msgs/GearCommand.msg"
-  "command_msgs/ParkCommand.msg"
-  "command_msgs/SteeringCommand.msg"
-  "command_msgs/VehicleModeCommand.msg"
+  "ctrl_msgs/A2V_BrakeCtrl.msg"
+  "ctrl_msgs/A2V_DriveCtrl.msg"
+  "ctrl_msgs/A2V_SteerCtrl.msg"
+  "ctrl_msgs/A2V_VehicleCtrl.msg"
+  "ctrl_msgs/A2V_WheelTorqueCtrl.msg"
 
   DEPENDENCIES std_msgs
  )

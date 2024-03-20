@@ -3,7 +3,7 @@
 <package format="3">
   <name>pix_vehicle_msgs</name>
   <version>0.0.0</version>
-  <description>pix_vehicle(opera_kit)`s Report/Command msgs interface</description>
+  <description>pix_vehicle(opera_kit)_B`s Report/Command msgs interface</description>
   <maintainer email="yhejon@avgenius.kr">JEON YANG HO</maintainer>
   <license>TODO: License declaration</license>
 

@@ -7,12 +7,15 @@ from can_utils.can_sender import CANSender
 from pix_vehicle_msgs.msg import (ThrottleCommand, BrakeCommand, GearCommand, ParkCommand, SteeringCommand,
                                   VehicleModeCommand)
 
-from pix_dataclass.ThrottleCommandData import ThrottleCommandData
-from pix_dataclass.BrakeCommandData import BrakeCommandData
-from pix_dataclass.SteeringCommandData import SteeringCommandData
-from pix_dataclass.GearCommandData import GearCommandData
-from pix_dataclass.ParkCommandData import ParkCommandData
-from pix_dataclass.VehicleModeCommandData import VehicleModeCommandData
+
+
+
+
+from pix_dataclass.VehicleCtrlData import VehicleCtrlData
+from pix_dataclass.SteerCtrlData import SteerCtrlData
+from pix_dataclass.WheelTorqueCtrlData import WheelTorqueCtrlData
+from pix_dataclass.BrakeCtrlData import BrakeCtrlData
+from pix_dataclass.DriveCtrlData import DriveCtrlData
 
 
 class CANCommandNode(Node):

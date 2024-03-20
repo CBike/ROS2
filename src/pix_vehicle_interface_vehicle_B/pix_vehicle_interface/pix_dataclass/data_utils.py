@@ -1,7 +1,8 @@
-def generate_byte_array(array_size: int, *args) -> bytearray:
+def generate_byte_array(array_size: int, *args, checksum=False) -> bytearray:
     """Generates a bytearray filled with data extracted from arguments within specified bit ranges.
 
     Args:
+        checksum:
         array_size (int): The size of the bytearray to be generated.
         *args: Variable length argument list. Each argument should be a tuple containing:
             - The data value (int).
@@ -26,7 +27,7 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
         start_byte, start_bit_offset = divmod(start_bit, 8)
         end_byte, end_bit_offset = divmod(end_bit, 8)
 
-        for byte_offset in range(start_byte, end_byte+1):
+        for byte_offset in range(start_byte, end_byte + 1):
             byte_value = 0
             # Iterate through each bit in the byte
             for bit_offset in range(8):
@@ -41,6 +42,10 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
 
             # Store the byte_value in the byte array
             byte_array[byte_offset] |= byte_value
+
+    if checksum:
+        byte_array[7] = (byte_array[0] ^ byte_array[1] ^ byte_array[2] ^ byte_array[3] ^
+                         byte_array[4] ^ byte_array[5] ^ byte_array[6])
 
     return byte_array
 
@@ -132,6 +137,3 @@ def int_to_bits(n: int) -> str:
         str: A binary string representing the integer, padded with zeros to ensure a length of 8.
     """
     return bin(n)[2:].zfill(8)
-
-
-

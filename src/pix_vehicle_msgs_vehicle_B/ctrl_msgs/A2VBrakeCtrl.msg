@@ -1,7 +1,7 @@
 std_msgs/Header header
 
 # [] [0|1] 0:disable 1:enable
-int8 vehicle_brake_control_Enable 0
+int8 vehicle_brake_control_enable 0
 
 # [] [0|1] 0:off（Relationship with whether the VCU controls the brake light is yes or no） 1:on
 int8 vehicle_brake_light_control 0

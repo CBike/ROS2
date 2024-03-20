@@ -7,10 +7,10 @@ int8 position_light_control 0
 int8 low_light_control 0
 
 # [] [0|1] 0:off 1:on
-int8 left_turn_light control 0
+int8 left_turn_light_control 0
 
 # [] [0|1] 0:off 1:on
-int8 right_turn_light control 0
+int8 right_turn_light_control 0
 
 # [] [0|1] 0:default 1:limit
 int8 speed_limit_control 0

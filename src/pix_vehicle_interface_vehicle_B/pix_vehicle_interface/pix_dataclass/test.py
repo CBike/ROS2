@@ -1,7 +1,8 @@
-def generate_byte_array(array_size: int, *args) -> bytearray:
+def generate_byte_array(array_size: int, *args, checksum: bool = False) -> bytearray:
     """Generates a bytearray filled with data extracted from arguments within specified bit ranges.
 
     Args:
+        checksum: checksum option
         array_size (int): The size of the bytearray to be generated.
         *args: Variable length argument list. Each argument should be a tuple containing:
             - The data value (int).
@@ -26,7 +27,7 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
         start_byte, start_bit_offset = divmod(start_bit, 8)
         end_byte, end_bit_offset = divmod(end_bit, 8)
 
-        for byte_offset in range(start_byte, end_byte+1,):
+        for byte_offset in range(start_byte, end_byte + 1):
             byte_value = 0
             # Iterate through each bit in the byte
             for bit_offset in range(8):
@@ -42,54 +43,20 @@ def generate_byte_array(array_size: int, *args) -> bytearray:
             # Store the byte_value in the byte array
             byte_array[byte_offset] |= byte_value
 
+    if checksum:
+        byte_array[7] = (byte_array[0] ^ byte_array[1] ^ byte_array[2] ^ byte_array[3] ^
+                         byte_array[4] ^ byte_array[5] ^ byte_array[6])
+
     return byte_array
 
-
-def set_data_in_byte_array(byte_array: bytearray, data: int, start_bit: int, end_bit: int):
-    """Sets the data in the specified bit range within the bytearray using big-endian byte order.
-
-    Args:
-        byte_array (bytearray): The bytearray to modify.
-        data (int): The data value to insert into the specified bit range.
-        start_bit (int): The starting bit index (inclusive) within the bytearray.
-        end_bit (int): The ending bit index (inclusive) within the bytearray.
-    """
-    # Calculate start and end byte indices
-    start_byte, start_bit_offset = divmod(start_bit, 8)
-    end_byte, end_bit_offset = divmod(end_bit, 8)
-
-    # Calculate the number of bits to fill in the first byte
-    bits_in_first_byte = min(8 - start_bit_offset, end_bit - start_bit + 1)
-
-    # Calculate the mask for the bits in the first byte
-    first_byte_mask = ((1 << bits_in_first_byte) - 1) << (8 - start_bit_offset - bits_in_first_byte)
-
-    # Fill in the bits in the first byte
-    byte_array[start_byte] &= ~first_byte_mask  # Clear the bits to be set
-    byte_array[start_byte] |= (data >> (end_bit - start_bit + 1 - bits_in_first_byte)) & first_byte_mask
-
-    # Fill in the bits in the middle bytes
-    for byte_index in range(start_byte + 1, end_byte):
-        byte_array[byte_index] = (data >> (end_bit - start_bit - (byte_index - start_byte) * 8)) & 0xFF
-
-    # Fill in the bits in the last byte
-    if start_byte != end_byte:
-        last_byte_bits = (end_bit - start_bit + 1) % 8
-        last_byte_mask = (1 << last_byte_bits) - 1
-        byte_array[end_byte] &= ~last_byte_mask  # Clear the bits to be set
-        byte_array[end_byte] |= (data & last_byte_mask) << (8 - last_byte_bits)
-
-
-
 def print_byte_array(byte_array):
-    hex_string = ' '.join(format(byte, '02x') for byte in byte_array)
-    ascii_string = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in byte_array)
+    hex_string = ' '.join(format(byte, '02x') for byte in byte_array[::-1])
+    ascii_string = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in byte_array[::-1])
 
     for i in range(0, len(byte_array), 16):
-        chunk_hex = hex_string[i:i + 32]
+        chunk_hex = hex_string[i*3:i*3 + 32*3].strip()
         chunk_ascii = ascii_string[i:i + 16]
         print(f"{chunk_hex.ljust(48)} {chunk_ascii}")
-
 
 if __name__ == '__main__':
     throttle_en_ctrl = (1, 0, 0)

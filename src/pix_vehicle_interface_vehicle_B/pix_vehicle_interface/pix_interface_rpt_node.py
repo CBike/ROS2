@@ -1,10 +1,19 @@
 from rclpy.node import Node
 from std_msgs.msg import Header
 from can_utils.can_receiver import CANReceiver
-from pix_vehicle_msgs.msg import (BmsReport, BrakeReport, GearReport, ParkReport, SteerReport,
-                                  ThrottleReport, VcuReport, WheelSpeedReport)
+from pix_vehicle_msgs.msg import (V2ABrakeStaFb,V2AChassisWheelRpmFb,V2AChassisWheelTorqueFb,V2ADriveStaFb,
+                                  V2APowerStaFb,V2ASteerStaFb,V2AVehicleFltStaFb,V2AVehicleStaFb,V2AVehicleWorkStaFb)
 import rclpy
 
+V2ABrakeStaFb
+V2AChassisWheelRpmFb
+V2AChassisWheelTorqueFb
+V2ADriveStaFb
+V2APowerStaFb
+V2ASteerStaFb
+V2AVehicleFltStaFb
+V2AVehicleStaFb
+V2AVehicleWorkStaFb
 
 class CANReceiverNode(Node):
     """
@@ -19,15 +28,16 @@ class CANReceiverNode(Node):
         self.can_receiver = CANReceiver(self.can_channel)
         self.can_receiver.start()
 
-        self.throttle_report_publisher = self.create_publisher(ThrottleReport, 'pix_vehicle_report/throttle_report', 10)
-        self.brake_report_publisher = self.create_publisher(BrakeReport, 'pix_vehicle_report/brake_report', 10)
-        self.steer_report_publisher = self.create_publisher(SteerReport, 'pix_vehicle_report/steer_report', 10)
-        self.gear_report_publisher = self.create_publisher(GearReport, 'pix_vehicle_report/gear_report', 10)
-        self.park_report_publisher = self.create_publisher(ParkReport, 'pix_vehicle_report/park_report', 10)
-        self.vcu_report_publisher = self.create_publisher(VcuReport, 'pix_vehicle_report/vcu_report', 10)
-        self.wheel_speed_report_publisher = self.create_publisher(WheelSpeedReport, 'pix_vehicle_report/wheel_speed',
+        self.throttle_report_publisher = self.create_publisher(V2ABrakeStaFb, 'pix_vehicle_report/brake_sta_fb', 10)
+        self.brake_report_publisher = self.create_publisher(V2AChassisWheelRpmFb, 'pix_vehicle_report/chassis_wheel_rpm_fb', 10)
+        self.steer_report_publisher = self.create_publisher(V2AChassisWheelTorqueFb, 'pix_vehicle_report/V2A_ChassisWheelTorqueFb', 10)
+        self.gear_report_publisher = self.create_publisher(V2ADriveStaFb, 'pix_vehicle_report/V2A_DriveStaFb', 10)
+        self.park_report_publisher = self.create_publisher(V2APowerStaFb, 'pix_vehicle_report/V2A_PowerStaFb', 10)
+        self.vcu_report_publisher = self.create_publisher(V2ASteerStaFb, 'pix_vehicle_report/V2A_SteerStaFb', 10)
+        self.wheel_speed_report_publisher = self.create_publisher(V2AVehicleFltStaFb, 'pix_vehicle_report/V2A_VehicleFltStaFb',
                                                                   10)
-        self.bms_report_publisher = self.create_publisher(BmsReport, 'pix_vehicle_report/bms_report', 10)
+        self.bms_report_publisher = self.create_publisher(V2AVehicleStaFb, 'pix_vehicle_report/V2A_VehicleStaFb', 10)
+        self.bms_report_publisher = self.create_publisher(V2AVehicleWorkStaFb, 'pix_vehicle_report/V2A_VehicleWorkStaFb', 10)
 
         self.throttle_report_timer = self.create_timer(0.02, self.pub_throttle_report)
         self.brake_report_timer = self.create_timer(0.02, self.pub_brake_report)

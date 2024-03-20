@@ -77,6 +77,6 @@ class WheelTorqueCtrlData:
 
     @staticmethod
     def validate_right_rear_motor_torque(val):
-        return -200 <= val <= 2000
+        return -200 <= val <= 200
 
 

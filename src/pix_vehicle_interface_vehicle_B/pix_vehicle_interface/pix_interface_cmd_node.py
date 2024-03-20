@@ -112,7 +112,7 @@ class CANCommandNode(Node):
             self.drive_ctrl_data.reset_data()
 
         self.drive_ctrl_data.add_cycle_count()
-        self.can_sender.send(0x130, self.throttle_data.get_bytearray())
+        self.can_sender.send(0x130, self.drive_ctrl_data.get_bytearray())
 
     def brake_ctrl_data_timer_callback(self):
         now = time_ns()
@@ -121,7 +121,7 @@ class CANCommandNode(Node):
             self.brake_ctrl_data.reset_data()
 
         self.brake_ctrl_data.add_cycle_count()
-        self.can_sender.send(0x131, self.brake_data.get_bytearray())
+        self.can_sender.send(0x131, self.brake_ctrl_data.get_bytearray())
 
     def steering_data_timer_callback(self):
         now = time_ns()
@@ -138,7 +138,7 @@ class CANCommandNode(Node):
         if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 300000000:
             self.gear_data.reset_data()
 
-        self.can_sender.send(0x133, self.gear_data.get_bytearray())
+        self.can_sender.send(0x133, self.vehicle_ctrl_data.get_bytearray())
 
     def wheel_ctrl_data_timer_callback(self):
         now = time_ns()
@@ -146,7 +146,7 @@ class CANCommandNode(Node):
         if (now - self.wheel_ctrl_data.get_value("last_update_time")) > 300000000:
             self.wheel_ctrl_data.reset_data()
 
-        self.can_sender.send(0x135, self.park_data.get_bytearray())
+        self.can_sender.send(0x135, self.wheel_ctrl_data.get_bytearray())
 
 
 def main(args=None):

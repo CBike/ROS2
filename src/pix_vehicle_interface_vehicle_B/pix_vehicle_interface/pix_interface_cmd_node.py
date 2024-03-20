@@ -4,18 +4,13 @@ from time import time_ns
 
 from can_utils.can_sender import CANSender
 
-from pix_vehicle_msgs.msg import (ThrottleCommand, BrakeCommand, GearCommand, ParkCommand, SteeringCommand,
-                                  VehicleModeCommand)
+from pix_vehicle_msgs.msg import (A2VBrakeCtrl, A2VDriveCtrl, A2VSteerCtrl, A2VVehicleCtrl, A2VWheelTorqueCtrl)
 
-
-
-
-
-from pix_dataclass.VehicleCtrlData import VehicleCtrlData
-from pix_dataclass.SteerCtrlData import SteerCtrlData
-from pix_dataclass.WheelTorqueCtrlData import WheelTorqueCtrlData
 from pix_dataclass.BrakeCtrlData import BrakeCtrlData
 from pix_dataclass.DriveCtrlData import DriveCtrlData
+from pix_dataclass.SteerCtrlData import SteerCtrlData
+from pix_dataclass.VehicleCtrlData import VehicleCtrlData
+from pix_dataclass.WheelTorqueCtrlData import WheelTorqueCtrlData
 
 
 class CANCommandNode(Node):
@@ -25,149 +20,133 @@ class CANCommandNode(Node):
         self.can_channel = 'can0'
         self.can_sender = CANSender(self.can_channel)
 
-        self.throttle_data = ThrottleCommandData()
-        self.brake_data = BrakeCommandData()
-        self.steering_data = SteeringCommandData()
-        self.gear_data = GearCommandData()
-        self.park_data = ParkCommandData()
-        self.vm_data = VehicleModeCommandData()
+        self.drive_ctrl_data = BrakeCtrlData()
+        self.brake_ctrl_data = DriveCtrlData()
+        self.steering_data = SteerCtrlData()
+        self.vehicle_ctrl_data = VehicleCtrlData()
+        self.wheel_ctrl_data = WheelTorqueCtrlData()
 
-        self.sub_throttle_cmd = self.create_subscription(ThrottleCommand, 'Vehicle/Pix/Throttle_Command',
-                                                         self.dispatch_command, 10)
+        self.sub_drive_ctrl_data = self.create_subscription(A2VDriveCtrl, 'Vehicle/Pix/drive_ctrl_data',
+                                                            self.dispatch_command, 10)
 
-        self.sub_brake_cmd = self.create_subscription(BrakeCommand, 'Vehicle/Pix/Brake_Command',
-                                                      self.dispatch_command, 10)
+        self.sub_brake_ctrl_data = self.create_subscription(A2VBrakeCtrl, 'Vehicle/Pix/brake_ctrl_data',
+                                                            self.dispatch_command, 10)
 
-        self.sub_steer_cmd = self.create_subscription(SteeringCommand, 'Vehicle/Pix/Steer_Command',
-                                                      self.dispatch_command, 10)
+        self.sub_steering_data = self.create_subscription(A2VSteerCtrl, 'Vehicle/Pix/steering_data',
+                                                          self.dispatch_command, 10)
 
-        self.sub_gear_cmd = self.create_subscription(GearCommand, 'Vehicle/Pix/Gear_Command',
-                                                     self.dispatch_command, 10)
+        self.sub_vehicle_ctrl_data = self.create_subscription(A2VVehicleCtrl, 'Vehicle/Pix/vehicle_ctrl_data',
+                                                              self.dispatch_command, 10)
 
-        self.sub_park_cmd = self.create_subscription(ParkCommand, 'Vehicle/Pix/Park_Command',
-                                                     self.dispatch_command, 10)
+        self.sub_wheel_ctrl_data = self.create_subscription(A2VWheelTorqueCtrl, 'Vehicle/Pix/wheel_ctrl_data',
+                                                            self.dispatch_command, 10)
 
-        self.sub_vmc_cmd = self.create_subscription(VehicleModeCommand, 'Vehicle/Pix/Vehicle_Mode_Command',
-                                                    self.dispatch_command, 10)
-
-        self.throttle_cmd_send_timer = self.create_timer(0.02, self.throttle_command_send_timer_callback)
-        self.brake_cmd_send_timer = self.create_timer(0.02, self.brake_command_send_timer_callback)
-        self.steer_cmd_send_timer = self.create_timer(0.02, self.steer_command_send_timer_callback)
-        self.gear_cmd_send_timer = self.create_timer(0.05, self.gear_command_send_timer_callback)
-        self.park_cmd_send_timer = self.create_timer(0.02, self.park_command_send_timer_callback)
-        self.vmc_cmd_send_timer = self.create_timer(0.1, self.vehicle_mode_command_send_timer_callback)
+        self.throttle_cmd_send_timer = self.create_timer(0.02, self.drive_ctrl_data_timer_callback)
+        self.brake_cmd_send_timer = self.create_timer(0.02, self.brake_ctrl_data_timer_callback)
+        self.steer_cmd_send_timer = self.create_timer(0.02, self.steering_data_timer_callback)
+        self.gear_cmd_send_timer = self.create_timer(0.2, self.vehicle_ctrl_data_timer_callback)
+        self.park_cmd_send_timer = self.create_timer(0.02, self.wheel_ctrl_data_timer_callback)
 
     def dispatch_command(self, msg):
 
-        if isinstance(msg, ThrottleCommand):
+        if isinstance(msg, A2VDriveCtrl):
             command_data = {
-                'throttle_en_ctrl': msg.throttle_en_ctrl,
-                'throttle_acc': msg.throttle_acc,
-                'throttle_pedal_target': msg.throttle_pedal_target,
-                'vel_target': msg.vel_target,
+                'vehicle_drive_control_enable': msg.vehicle_drive_control_enable,
+                'drive_mode_control': msg.drive_mode_control,
+                'gear_control': msg.gear_control,
+                'vehicle_speed_control': msg.vehicle_speed_control,
+                'vehicle_throttle_control': msg.vehicle_throttle_control,
             }
 
-            self.throttle_data.update_value(**command_data)
+            self.drive_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, BrakeCommand):
+        elif isinstance(msg, A2VBrakeCtrl):
             command_data = {
-                'brake_en_ctrl': msg.brake_en_ctrl,
-                'aeb_en_ctrl': msg.aeb_en_ctrl,
-                'brake_dec': msg.brake_dec,
-                'brake_pedal_target': msg.brake_pedal_target,
+                'vehicle_brake_control_enable': msg.vehicle_brake_control_enable,
+                'vehicle_brake_light_control': msg.vehicle_brake_light_control,
+                'vehicle_brake_control': msg.vehicle_brake_control,
+                'parking_control': msg.parking_control,
             }
 
-            self.brake_data.update_value(**command_data)
+            self.brake_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, SteeringCommand):
+        elif isinstance(msg, A2VSteerCtrl):
             command_data = {
-                'steer_en_ctrl': msg.steer_en_ctrl,
-                'steer_angle_spd': msg.steer_angle_spd,
-                'steer_angle_target': msg.steer_angle_target,
+                'vehicle_steering_control_enable': msg.vehicle_steering_control_enable,
+                'steering_mode_control': msg.steering_mode_control,
+                'vehicle_steering_control_front': msg.vehicle_steering_control_front,
+                'vehicle_steering_control_rear': msg.vehicle_steering_control_rear,
+                'vehicle_steering_wheel_speed_control': msg.vehicle_steering_wheel_speed_control,
             }
 
             self.steering_data.update_value(**command_data)
 
-        elif isinstance(msg, GearCommand):
+        elif isinstance(msg, A2VVehicleCtrl):
 
             command_data = {
-                'gear_en_ctrl': msg.gear_en_ctrl,
-                'gear_target': msg.gear_target,
+                'position_light_control': msg.position_light_control,
+                'low_light_control': msg.low_light_control,
+                'left_turn_light_control': msg.left_turn_light_control,
+                'right_turn_light_control': msg.right_turn_light_control,
+                'speed_limit_control': msg.speed_limit_control,
+                'speed_limit': msg.speed_limit,
+                'check_mode_enable': msg.check_mode_enable,
             }
-            self.gear_data.update_value(**command_data)
+            self.vehicle_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, ParkCommand):
+        elif isinstance(msg, A2VWheelTorqueCtrl):
 
             command_data = {
-                'park_en_ctrl': msg.park_en_ctrl,
-                'park_target': msg.park_target,
+                'left_front_motor_torque': msg.left_front_motor_torque,
+                'right_front_motor_torque': msg.right_front_motor_torque,
+                'left_rear_motor_torque': msg.left_rear_motor_torque,
+                'right_rear_motor_torque': msg.right_rear_motor_torque,
             }
 
-            self.park_data.update_value(**command_data)
-            
-        elif isinstance(msg, VehicleModeCommand):
-            command_data = {
-                'steer_mode_ctrl': msg.steer_mode_ctrl,
-                'drive_mode_ctrl': msg.drive_mode_ctrl,
-                'turn_light_ctrl': msg.turn_light_ctrl,
-            }
+            self.wheel_ctrl_data.update_value(**command_data)
 
-            self.vm_data.update_value(**command_data)
-
-    def throttle_command_send_timer_callback(self):
+    def drive_ctrl_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.throttle_data.get_value('last_update_time')) > 300000000:
-            self.throttle_data.reset_data()
+        if (now - self.drive_ctrl_data.get_value('last_update_time')) > 300000000:
+            self.drive_ctrl_data.reset_data()
 
-        self.throttle_data.add_checksum()
-        self.can_sender.send(0x100, self.throttle_data.get_bytearray())
+        self.drive_ctrl_data.add_cycle_count()
+        self.can_sender.send(0x130, self.throttle_data.get_bytearray())
 
-    def brake_command_send_timer_callback(self):
+    def brake_ctrl_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.brake_data.get_value('last_update_time')) > 300000000:
-            self.brake_data.reset_data()
+        if (now - self.brake_ctrl_data.get_value('last_update_time')) > 300000000:
+            self.brake_ctrl_data.reset_data()
 
-        self.brake_data.add_checksum()
-        self.can_sender.send(0x101, self.brake_data.get_bytearray())
+        self.brake_ctrl_data.add_cycle_count()
+        self.can_sender.send(0x131, self.brake_data.get_bytearray())
 
-    def steer_command_send_timer_callback(self):
+    def steering_data_timer_callback(self):
         now = time_ns()
 
         if (now - self.steering_data.get_value('last_update_time')) > 300000000:
             self.steering_data.reset_data()
 
-        self.steering_data.add_checksum()
-        self.can_sender.send(0x102, self.steering_data.get_bytearray())
+        self.steering_data.add_cycle_count()
+        self.can_sender.send(0x132, self.steering_data.get_bytearray())
 
-    def gear_command_send_timer_callback(self):
+    def vehicle_ctrl_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.gear_data.get_value('last_update_time')) > 300000000:
+        if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 300000000:
             self.gear_data.reset_data()
 
-        self.gear_data.add_checksum()
-        self.can_sender.send(0x103, self.gear_data.get_bytearray())
+        self.can_sender.send(0x133, self.gear_data.get_bytearray())
 
-    def park_command_send_timer_callback(self):
+    def wheel_ctrl_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.park_data.get_value("last_update_time")) > 300000000:
-            self.park_data.reset_data()
+        if (now - self.wheel_ctrl_data.get_value("last_update_time")) > 300000000:
+            self.wheel_ctrl_data.reset_data()
 
-        self.park_data.add_checksum()
-        self.can_sender.send(0x104, self.park_data.get_bytearray())
-
-    def vehicle_mode_command_send_timer_callback(self):
-        now = time_ns()
-
-        if (now - self.vm_data.get_value('last_update_time')) > 300000000:
-            self.vm_data.reset_data()
-
-        self.vm_data.add_checksum()
-        self.can_sender.send(0x105, self.vm_data.get_bytearray())
-
+        self.can_sender.send(0x135, self.park_data.get_bytearray())
 
 
 def main(args=None):

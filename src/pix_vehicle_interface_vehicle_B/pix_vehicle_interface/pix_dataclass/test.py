@@ -49,37 +49,138 @@ def generate_byte_array(array_size: int, *args, checksum: bool = False) -> bytea
 
     return byte_array
 
+
 def print_byte_array(byte_array):
-    hex_string = ' '.join(format(byte, '02x') for byte in byte_array[::-1])
-    ascii_string = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in byte_array[::-1])
+    hex_string = ' '.join(format(byte, '02x') for byte in byte_array)
+    ascii_string = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in byte_array)
 
     for i in range(0, len(byte_array), 16):
-        chunk_hex = hex_string[i*3:i*3 + 32*3].strip()
+        chunk_hex = hex_string[i * 3:i * 3 + 32 * 3].strip()
         chunk_ascii = ascii_string[i:i + 16]
         print(f"{chunk_hex.ljust(48)} {chunk_ascii}")
 
 
-
 if __name__ == '__main__':
-    vehicle_brake_control_enable = 0
-    vehicle_brake_light_control = 0
-    vehicle_brake_control = 0
-    parking_control = 2
-    cycle_count = 15
+    # throttle test
+
+    vehicle_drive_control_enable = 1
+    drive_mode_control = 3
+    gear_control = 3
+    vehicle_speed_control = 50.00
+    vehicle_throttle_control = 100.0
+    throttle_cycle_count = 15
+
+    vehicle_drive_control_enable = (vehicle_drive_control_enable, 0, 0)
+    drive_mode_control = (drive_mode_control, 2, 3)
+    gear_control = (gear_control, 4, 5)
+
+    vehicle_speed_control_lower = (int(vehicle_speed_control / 0.01) & 0xFF, 8, 15)
+    vehicle_speed_control_upper = ((int(vehicle_speed_control / 0.01) >> 8) & 0xFF, 16, 23)
+
+    vehicle_throttle_control_lower = (int(vehicle_throttle_control / 0.1) & 0xFF, 24, 31)
+    vehicle_throttle_control_upper = ((int(vehicle_throttle_control / 0.1) >> 8) & 0b11, 32, 33)
+
+    cycle_count = (throttle_cycle_count, 48, 51)
+
+    ret = generate_byte_array(8, vehicle_drive_control_enable,
+                              drive_mode_control,
+                              gear_control,
+                              vehicle_speed_control_lower,
+                              vehicle_speed_control_upper,
+                              vehicle_throttle_control_lower,
+                              vehicle_throttle_control_upper,
+                              cycle_count,
+
+                              checksum=True)
+
+    print(f'throttle control {ret}')
+    print_byte_array(ret)
+
+    # brake test
+
+    vehicle_brake_control_enable = 1
+    vehicle_brake_light_control = 1
+    vehicle_brake_control = 100.0
+    parking_control = 3
+    brake_cycle_count = 15
+
     vehicle_brake_control_enable = (vehicle_brake_control_enable, 0, 0)
     vehicle_brake_light_control = (vehicle_brake_light_control, 1, 1)
-
-    vehicle_brake_control_lower = ((int(vehicle_brake_control / 0.1) << 2) & 0xFF, 8, 15)
-    vehicle_brake_control_upper = (int(vehicle_brake_control / 0.1) & 0b11, 16, 17)
+    vehicle_brake_control_lower = (int(vehicle_brake_control / 0.1) & 0xFF, 8, 15)
+    vehicle_brake_control_upper = ((int(vehicle_brake_control / 0.1) >> 8) & 0b11, 16, 17)
 
     parking_control = (parking_control, 24, 25)
-    cycle_count = (cycle_count, 48, 51)
+
+    breke_cycle_count = (brake_cycle_count, 48, 51)
 
     ret = generate_byte_array(8, vehicle_brake_control_enable,
-                                  vehicle_brake_light_control,
-                                  vehicle_brake_control_lower,
-                                  vehicle_brake_control_upper,
-                                  parking_control,
-                                  cycle_count, checksum=True)
-    print(f'brake control: {ret}')
+                              vehicle_brake_light_control,
+                              vehicle_brake_control_lower,
+                              vehicle_brake_control_upper,
+                              parking_control,
+                              breke_cycle_count, checksum=True)
+    print(f'brake control {ret}')
+    print_byte_array(ret)
 
+    # steer ctrl test
+    vehicle_steering_control_enable = 0
+    steering_mode_control = 0
+    vehicle_steering_control_front = -500
+    vehicle_steering_control_rear = -500
+    vehicle_steering_wheel_speed_control = 250
+    steer_cycle_count = 15
+
+    vehicle_steering_control_enable = (vehicle_steering_control_enable, 0, 0)
+    steering_mode_control = (steering_mode_control, 4, 7)
+
+    vehicle_steering_control_front_lower = (vehicle_steering_control_front & 0xFF, 8, 15)
+    vehicle_steering_control_front_upper = ((vehicle_steering_control_front >> 8) & 0xFF, 16, 23)
+
+    vehicle_steering_control_rear_lower = (vehicle_steering_control_rear & 0xFF, 24, 32)
+    vehicle_steering_control_rear_upper = ((vehicle_steering_control_rear >> 8) & 0xFF, 32, 39)
+
+    vehicle_steering_wheel_speed_control = (vehicle_steering_wheel_speed_control / 2, 40, 47)
+    steer_cycle_count = (steer_cycle_count, 48, 51)
+
+    ret = generate_byte_array(8, vehicle_steering_control_enable,
+                              steering_mode_control,
+                              vehicle_steering_control_front_lower,
+                              vehicle_steering_control_front_upper,
+                              vehicle_steering_control_rear_lower,
+                              vehicle_steering_control_rear_upper,
+                              vehicle_steering_wheel_speed_control,
+                              cycle_count, checksum=True)
+
+    print(f'steer control {ret}')
+    print_byte_array(ret)
+
+    # vehicle ctrl test
+    # wheel torque ctrl test
+    left_front_motor_torque = 20
+    right_front_motor_torque = 20
+    left_rear_motor_torque = 20
+    right_rear_motor_torque = 20
+
+    left_front_motor_torque_lower = (int(left_front_motor_torque / 0.1) & 0xFF, 0, 7)
+    left_front_motor_torque_upper = ((int(left_front_motor_torque / 0.1) >> 8) & 0xFF, 8, 15)
+
+    right_front_motor_torque_lower = (int(right_front_motor_torque / 0.1) & 0xFF, 16, 23)
+    right_front_motor_torque_upper = ((int(right_front_motor_torque / 0.1) >> 8) & 0xFF, 24, 31)
+
+    left_rear_motor_torque_lower = (int(left_rear_motor_torque / 0.1) & 0xFF, 32, 39)
+    left_rear_motor_torque_upper = ((int(left_rear_motor_torque / 0.1) >> 8) & 0xFF, 40, 47)
+
+    right_rear_motor_torque_lower = (int(right_rear_motor_torque / 0.1) & 0xFF, 48, 55)
+    right_rear_motor_torque_upper = ((int(right_rear_motor_torque / 0.1) >> 8) & 0xFF, 56, 63)
+
+    ret = generate_byte_array(8, left_front_motor_torque_lower,
+                              left_front_motor_torque_upper,
+                              right_front_motor_torque_lower,
+                              right_front_motor_torque_upper,
+                              left_rear_motor_torque_lower,
+                              left_rear_motor_torque_upper,
+                              right_rear_motor_torque_lower,
+                              right_rear_motor_torque_upper, checksum=False)
+
+    print(f'wheel control {ret}')
+    print_byte_array(ret)

@@ -57,8 +57,8 @@ class BrakeCtrlData:
         vehicle_brake_control_enable = (self.vehicle_brake_control_enable, 0, 0)
         vehicle_brake_light_control = (self.vehicle_brake_light_control, 1, 1)
 
-        vehicle_brake_control_lower = ((int(self.vehicle_brake_control / 0.1) << 2) & 0xFF, 8, 15)
-        vehicle_brake_control_upper = (int(self.vehicle_brake_control / 0.1) & 0b11, 16, 17)
+        vehicle_brake_control_lower = (int(self.vehicle_brake_control / 0.1) & 0xFF, 8, 15)
+        vehicle_brake_control_upper = ((int(self.vehicle_brake_control / 0.1) >> 8) & 0b11, 16, 17)
 
         parking_control = (self.parking_control, 24, 25)
         cycle_count = (self.cycle_count, 48, 51)

@@ -59,10 +59,13 @@ class DriveCtrlData:
         vehicle_drive_control_enable = (self.vehicle_drive_control_enable, 0, 0)
         drive_mode_control = (self.drive_mode_control, 2, 3)
         gear_control = (self.gear_control, 4, 5)
-        vehicle_speed_control_upper = ((int(self.vehicle_speed_control / 0.01) >> 8) & 0xFF, 16, 23)
+
         vehicle_speed_control_lower = (int(self.vehicle_speed_control / 0.01) & 0xFF, 8, 15)
-        vehicle_throttle_control_lower = ((int(self.vehicle_throttle_control / 0.1) >> 8) & 0xFF, 24, 31)
-        vehicle_throttle_control_upper = (int(self.vehicle_throttle_control / 0.1) & 0b11, 32, 33)
+        vehicle_speed_control_upper = ((int(self.vehicle_speed_control / 0.01) >> 8) & 0xFF, 16, 23)
+
+        vehicle_throttle_control_lower = (int(self.vehicle_throttle_control / 0.1) & 0xFF, 24, 31)
+        vehicle_throttle_control_upper = ((int(self.vehicle_throttle_control / 0.1) >> 8) & 0b11, 32, 33)
+
         cycle_count = (self.cycle_count, 48, 51)
 
         return generate_byte_array(8, vehicle_drive_control_enable,

@@ -359,15 +359,15 @@ class CANReceiver:
         bms_maximum_monomer_temperature = struct.unpack('<B', data[6:7])[0]
 
         parsed_data = dict()
-        parsed_data['parking_actual'] = vehicle_charge_status \
+        parsed_data['vehicle_charge_status'] = vehicle_charge_status \
             if validate_vehicle_charge_status(vehicle_charge_status) else 0
-        parsed_data['parking_actual'] = vehicle_power_battery_electricity_amount \
+        parsed_data['vehicle_power_battery_electricity_amount'] = vehicle_power_battery_electricity_amount \
             if validate_vehicle_power_battery_electricity_amount(vehicle_power_battery_electricity_amount) else 0
-        parsed_data['parking_actual'] = vehicle_power_battery_voltage \
+        parsed_data['vehicle_power_battery_voltage'] = vehicle_power_battery_voltage \
             if validate_vehicle_power_battery_voltage(vehicle_power_battery_voltage) else 0.0
-        parsed_data['parking_actual'] = vehicle_power_battery_current \
+        parsed_data['vehicle_power_battery_current'] = vehicle_power_battery_current \
             if validate_vehicle_power_battery_current(vehicle_power_battery_current) else 0.0
-        parsed_data['parking_actual'] = bms_maximum_monomer_temperature \
+        parsed_data['bms_maximum_monomer_temperature'] = bms_maximum_monomer_temperature \
             if validate_bms_maximum_monomer_temperature(bms_maximum_monomer_temperature) else 0
 
         return parsed_data

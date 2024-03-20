@@ -61,8 +61,10 @@ class BrakeCtrlData:
         parking_control = (self.parking_control, 24, 25)
         cycle_count = (self.cycle_count, 48, 51)
 
-        return generate_byte_array(8, (vehicle_brake_control_enable, vehicle_brake_light_control,
-                                       vehicle_brake_control_lower, vehicle_brake_control_upper,
+        return generate_byte_array(8, (vehicle_brake_control_enable,
+                                       vehicle_brake_light_control,
+                                       vehicle_brake_control_lower,
+                                       vehicle_brake_control_upper,
                                        parking_control, cycle_count), checksum=True)
 
     @staticmethod

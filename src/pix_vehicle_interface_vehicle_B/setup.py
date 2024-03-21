@@ -1,5 +1,9 @@
 from setuptools import find_packages, setup
+import os
 from glob import glob
+
+# Other imports ...
+
 
 package_name = 'pix_vehicle_interface'
 
@@ -9,7 +13,7 @@ setup(
     packages=find_packages(),
     data_files=[
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*_launch.[py][yma]*'))),
         ('lib/' + package_name + '/can_utils', ['pix_vehicle_interface/can_utils/can_receiver.py',
                                                 'pix_vehicle_interface/can_utils/can_sender.py']),
 

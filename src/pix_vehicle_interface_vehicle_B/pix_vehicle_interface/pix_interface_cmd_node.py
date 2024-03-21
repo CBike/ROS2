@@ -41,11 +41,11 @@ class CANCommandNode(Node):
         self.sub_wheel_ctrl_data = self.create_subscription(WheelTorqueCtrl, 'Vehicle/Pix/wheel_ctrl_data',
                                                             self.dispatch_command, 10)
 
-        self.throttle_cmd_send_timer = self.create_timer(0.02, self.drive_ctrl_data_timer_callback)
-        self.brake_cmd_send_timer = self.create_timer(0.02, self.brake_ctrl_data_timer_callback)
-        self.steer_cmd_send_timer = self.create_timer(0.02, self.steering_data_timer_callback)
-        self.gear_cmd_send_timer = self.create_timer(0.2, self.vehicle_ctrl_data_timer_callback)
-        self.park_cmd_send_timer = self.create_timer(0.02, self.wheel_ctrl_data_timer_callback)
+        self.drive_ctrl_send_timer = self.create_timer(0.02, self.drive_ctrl_data_timer_callback)
+        self.brake_ctrl_send_timer = self.create_timer(0.02, self.brake_ctrl_data_timer_callback)
+        self.steer_ctrl_send_timer = self.create_timer(0.02, self.steering_data_timer_callback)
+        self.vehicle_ctrl_send_timer = self.create_timer(0.2, self.vehicle_ctrl_data_timer_callback)
+        self.wheel_ctrl_send_timer = self.create_timer(0.02, self.wheel_ctrl_data_timer_callback)
 
     def dispatch_command(self, msg):
 
@@ -136,7 +136,7 @@ class CANCommandNode(Node):
         now = time_ns()
 
         if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 300000000:
-            self.gear_data.reset_data()
+            self.vehicle_ctrl_data.reset_data()
 
         self.can_sender.send(0x133, self.vehicle_ctrl_data.get_bytearray())
 

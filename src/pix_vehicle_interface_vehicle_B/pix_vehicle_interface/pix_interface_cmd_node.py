@@ -22,7 +22,7 @@ class CANCommandNode(Node):
 
         self.drive_ctrl_data = BrakeCtrlData()
         self.brake_ctrl_data = DriveCtrlData()
-        self.steering_data = SteerCtrlData()
+        self.steer_ctrl_data = SteerCtrlData()
         self.vehicle_ctrl_data = VehicleCtrlData()
         self.wheel_ctrl_data = WheelTorqueCtrlData()
 
@@ -32,8 +32,8 @@ class CANCommandNode(Node):
         self.sub_brake_ctrl_data = self.create_subscription(BrakeCtrl, 'Vehicle/Pix/brake_ctrl_data',
                                                             self.dispatch_command, 10)
 
-        self.sub_steering_data = self.create_subscription(SteerCtrl, 'Vehicle/Pix/steering_data',
-                                                          self.dispatch_command, 10)
+        self.sub_steer_ctrl_data = self.create_subscription(SteerCtrl, 'Vehicle/Pix/steer_ctrl_data',
+                                                            self.dispatch_command, 10)
 
         self.sub_vehicle_ctrl_data = self.create_subscription(VehicleCtrl, 'Vehicle/Pix/vehicle_ctrl_data',
                                                               self.dispatch_command, 10)
@@ -79,7 +79,7 @@ class CANCommandNode(Node):
                 'vehicle_steering_wheel_speed_control': msg.vehicle_steering_wheel_speed_control,
             }
 
-            self.steering_data.update_value(**command_data)
+            self.steer_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, VehicleCtrl):
 
@@ -126,11 +126,11 @@ class CANCommandNode(Node):
     def steering_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.steering_data.get_value('last_update_time')) > 300000000:
-            self.steering_data.reset_data()
+        if (now - self.steer_ctrl_data.get_value('last_update_time')) > 300000000:
+            self.steer_ctrl_data.reset_data()
 
-        self.steering_data.add_cycle_count()
-        self.can_sender.send(0x132, self.steering_data.get_bytearray())
+        self.steer_ctrl_data.add_cycle_count()
+        self.can_sender.send(0x132, self.steer_ctrl_data.get_bytearray())
 
     def vehicle_ctrl_data_timer_callback(self):
         now = time_ns()

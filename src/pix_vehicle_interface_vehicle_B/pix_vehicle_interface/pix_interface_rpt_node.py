@@ -1,9 +1,9 @@
 from rclpy.node import Node
 from std_msgs.msg import Header
 from can_utils.can_receiver import CANReceiver
-from pix_vehicle_msgs.msg import (V2ABrakeStaFb, V2AChassisWheelRpmFb, V2AChassisWheelTorqueFb, V2ADriveStaFb,
-                                  V2APowerStaFb, V2ASteerStaFb, V2AVehicleFltStaFb, V2AVehicleStaFb,
-                                  V2AVehicleWorkStaFb)
+from pix_vehicle_msgs.msg import (BrakeStaFb, ChassisWheelRpmFb, ChassisWheelTorqueFb, DriveStaFb,
+                                  PowerStaFb, SteerStaFb, VehicleFltStaFb, VehicleStaFb,
+                                  VehicleWorkStaFb)
 import rclpy
 
 
@@ -20,24 +20,24 @@ class CANReceiverNode(Node):
         self.can_receiver = CANReceiver(self.can_channel)
         self.can_receiver.start()
 
-        self.drive_sta_fb_publisher = self.create_publisher(V2ADriveStaFb, 'pix_vehicle_report/drive_sta_fb', 10)
-        self.brake_sta_fb_publisher = self.create_publisher(V2ABrakeStaFb, 'pix_vehicle_report/brake_sta_fb', 10)
-        self.steer_sta_fb_publisher = self.create_publisher(V2ASteerStaFb, 'pix_vehicle_report/steer_sta_fb', 10)
+        self.drive_sta_fb_publisher = self.create_publisher(DriveStaFb, 'pix_vehicle_report/drive_sta_fb', 10)
+        self.brake_sta_fb_publisher = self.create_publisher(BrakeStaFb, 'pix_vehicle_report/brake_sta_fb', 10)
+        self.steer_sta_fb_publisher = self.create_publisher(SteerStaFb, 'pix_vehicle_report/steer_sta_fb', 10)
 
-        self.vehicle_work_sta_fb_publisher = self.create_publisher(V2AVehicleWorkStaFb,
+        self.vehicle_work_sta_fb_publisher = self.create_publisher(VehicleWorkStaFb,
                                                                    'pix_vehicle_report/vehicle_work_sta_fb', 10)
 
-        self.power_sta_fb_publisher = self.create_publisher(V2APowerStaFb, 'pix_vehicle_report/power_sta_fb', 10)
+        self.power_sta_fb_publisher = self.create_publisher(PowerStaFb, 'pix_vehicle_report/power_sta_fb', 10)
 
-        self.vehicle_sta_fb_publisher = self.create_publisher(V2AVehicleStaFb, 'pix_vehicle_report/vehicle_sta_fb', 10)
+        self.vehicle_sta_fb_publisher = self.create_publisher(VehicleStaFb, 'pix_vehicle_report/vehicle_sta_fb', 10)
 
-        self.vehicle_flt_sta_fb_publisher = self.create_publisher(V2AVehicleFltStaFb,
+        self.vehicle_flt_sta_fb_publisher = self.create_publisher(VehicleFltStaFb,
                                                                   'pix_vehicle_report/vehicle_flt_sta_fb', 10)
 
-        self.chassis_wheel_rpm_fb_publisher = self.create_publisher(V2AChassisWheelRpmFb,
+        self.chassis_wheel_rpm_fb_publisher = self.create_publisher(ChassisWheelRpmFb,
                                                                     'pix_vehicle_report/chassis_wheel_rpm_fb', 10)
 
-        self.chassis_wheel_torque_fb_publisher = self.create_publisher(V2AChassisWheelTorqueFb,
+        self.chassis_wheel_torque_fb_publisher = self.create_publisher(ChassisWheelTorqueFb,
                                                                        'pix_vehicle_report/chassis_wheel_torque_fb', 10)
 
         self.drive_sta_fb_timer = self.create_timer(0.02, self.drive_sta_fb_timer_call_back)
@@ -57,7 +57,7 @@ class CANReceiverNode(Node):
 
         get_msg = self.can_receiver.get_report('drive_sta_fb')
         if get_msg is not None:
-            pub_msg = V2ADriveStaFb()
+            pub_msg = DriveStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_drive_sta_fb"
@@ -81,7 +81,7 @@ class CANReceiverNode(Node):
          """
         get_msg = self.can_receiver.get_report('brake_sta_fb')
         if get_msg is not None:
-            pub_msg = V2ABrakeStaFb()
+            pub_msg = BrakeStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_brake_sta_fb"
@@ -99,7 +99,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('steer_sta_fb')
         if get_msg is not None:
-            pub_msg = V2ASteerStaFb()
+            pub_msg = SteerStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_steer_sta_fb"
@@ -119,7 +119,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('vehicle_work_sta_fb')
         if get_msg is not None:
-            pub_msg = V2AVehicleWorkStaFb()
+            pub_msg = VehicleWorkStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_vehicle_work_sta_fb"
@@ -142,7 +142,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('power_sta_fb')
         if get_msg is not None:
-            pub_msg = V2APowerStaFb()
+            pub_msg = PowerStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_power_sta_fb"
@@ -159,7 +159,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('vehicle_sta_fb')
         if get_msg is not None:
-            pub_msg = V2AVehicleStaFb()
+            pub_msg = VehicleStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_vehicle_sta_fb"
@@ -176,7 +176,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('vehicle_flt_sta_fb')
         if get_msg is not None:
-            pub_msg = V2AVehicleFltStaFb()
+            pub_msg = VehicleFltStaFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_vehicle_flt_sta_fb"
@@ -204,7 +204,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('chassis_wheel_rpm_fb')
         if get_msg is not None:
-            pub_msg = V2AChassisWheelRpmFb()
+            pub_msg = ChassisWheelRpmFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.left_front_wheel_speed = get_msg['left_front_wheel_speed']
@@ -221,7 +221,7 @@ class CANReceiverNode(Node):
         """
         get_msg = self.can_receiver.get_report('chassis_wheel_torque_fb')
         if get_msg is not None:
-            pub_msg = V2AChassisWheelTorqueFb()
+            pub_msg = ChassisWheelTorqueFb()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
             pub_msg.header.frame_id = "report_chassis_wheel_torque_fb"

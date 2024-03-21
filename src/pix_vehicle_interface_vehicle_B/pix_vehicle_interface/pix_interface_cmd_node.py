@@ -4,7 +4,7 @@ from time import time_ns
 
 from can_utils.can_sender import CANSender
 
-from pix_vehicle_msgs.msg import (A2VBrakeCtrl, A2VDriveCtrl, A2VSteerCtrl, A2VVehicleCtrl, A2VWheelTorqueCtrl)
+from pix_vehicle_msgs.msg import (BrakeCtrl, DriveCtrl, SteerCtrl, VehicleCtrl, WheelTorqueCtrl)
 
 from pix_dataclass.BrakeCtrlData import BrakeCtrlData
 from pix_dataclass.DriveCtrlData import DriveCtrlData
@@ -26,19 +26,19 @@ class CANCommandNode(Node):
         self.vehicle_ctrl_data = VehicleCtrlData()
         self.wheel_ctrl_data = WheelTorqueCtrlData()
 
-        self.sub_drive_ctrl_data = self.create_subscription(A2VDriveCtrl, 'Vehicle/Pix/drive_ctrl_data',
+        self.sub_drive_ctrl_data = self.create_subscription(DriveCtrl, 'Vehicle/Pix/drive_ctrl_data',
                                                             self.dispatch_command, 10)
 
-        self.sub_brake_ctrl_data = self.create_subscription(A2VBrakeCtrl, 'Vehicle/Pix/brake_ctrl_data',
+        self.sub_brake_ctrl_data = self.create_subscription(BrakeCtrl, 'Vehicle/Pix/brake_ctrl_data',
                                                             self.dispatch_command, 10)
 
-        self.sub_steering_data = self.create_subscription(A2VSteerCtrl, 'Vehicle/Pix/steering_data',
+        self.sub_steering_data = self.create_subscription(SteerCtrl, 'Vehicle/Pix/steering_data',
                                                           self.dispatch_command, 10)
 
-        self.sub_vehicle_ctrl_data = self.create_subscription(A2VVehicleCtrl, 'Vehicle/Pix/vehicle_ctrl_data',
+        self.sub_vehicle_ctrl_data = self.create_subscription(VehicleCtrl, 'Vehicle/Pix/vehicle_ctrl_data',
                                                               self.dispatch_command, 10)
 
-        self.sub_wheel_ctrl_data = self.create_subscription(A2VWheelTorqueCtrl, 'Vehicle/Pix/wheel_ctrl_data',
+        self.sub_wheel_ctrl_data = self.create_subscription(WheelTorqueCtrl, 'Vehicle/Pix/wheel_ctrl_data',
                                                             self.dispatch_command, 10)
 
         self.throttle_cmd_send_timer = self.create_timer(0.02, self.drive_ctrl_data_timer_callback)
@@ -49,7 +49,7 @@ class CANCommandNode(Node):
 
     def dispatch_command(self, msg):
 
-        if isinstance(msg, A2VDriveCtrl):
+        if isinstance(msg, DriveCtrl):
             command_data = {
                 'vehicle_drive_control_enable': msg.vehicle_drive_control_enable,
                 'drive_mode_control': msg.drive_mode_control,
@@ -60,7 +60,7 @@ class CANCommandNode(Node):
 
             self.drive_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, A2VBrakeCtrl):
+        elif isinstance(msg, BrakeCtrl):
             command_data = {
                 'vehicle_brake_control_enable': msg.vehicle_brake_control_enable,
                 'vehicle_brake_light_control': msg.vehicle_brake_light_control,
@@ -70,7 +70,7 @@ class CANCommandNode(Node):
 
             self.brake_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, A2VSteerCtrl):
+        elif isinstance(msg, SteerCtrl):
             command_data = {
                 'vehicle_steering_control_enable': msg.vehicle_steering_control_enable,
                 'steering_mode_control': msg.steering_mode_control,
@@ -81,7 +81,7 @@ class CANCommandNode(Node):
 
             self.steering_data.update_value(**command_data)
 
-        elif isinstance(msg, A2VVehicleCtrl):
+        elif isinstance(msg, VehicleCtrl):
 
             command_data = {
                 'position_light_control': msg.position_light_control,
@@ -94,7 +94,7 @@ class CANCommandNode(Node):
             }
             self.vehicle_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, A2VWheelTorqueCtrl):
+        elif isinstance(msg, WheelTorqueCtrl):
 
             command_data = {
                 'left_front_motor_torque': msg.left_front_motor_torque,

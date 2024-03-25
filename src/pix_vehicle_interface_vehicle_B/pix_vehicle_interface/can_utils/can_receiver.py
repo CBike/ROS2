@@ -202,8 +202,10 @@ class CANReceiver:
         brake_en_state = struct.unpack('<B', data[0:1])[0] & 0b00000001
         brake_light_en_state = (struct.unpack('<B', data[0:1])[0] >> 2) & 0b00000001
         parking_state = (struct.unpack('<B', data[0:1])[0] >> 4) & 0b00000011
+
         brake_pedal_val_fb = ((struct.unpack('<B', data[1:2])[0]) |
                               (struct.unpack('<B', data[2:3])[0] & 0b00000011)) * 0.1
+
         brake_pressure_fb = struct.unpack('<B', data[3:4])[0]
         vcu_cycle_count = struct.unpack('<B', data[6:7])[0] & 0b00001111
 

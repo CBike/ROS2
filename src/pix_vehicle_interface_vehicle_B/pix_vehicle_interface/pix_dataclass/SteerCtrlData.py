@@ -10,7 +10,7 @@ class SteerCtrlData:
     steering_mode_control: int = 0
     vehicle_steering_control_front: int = 0
     vehicle_steering_control_rear: int = 0
-    vehicle_steering_wheel_speed_control: int = 0
+    vehicle_steering_wheel_speed_control: int = 480
     cycle_count: int = 0
     last_update_time: int = 0
 

@@ -4,7 +4,13 @@ from time import time_ns
 
 from can_utils.can_sender import CANSender
 
-from pix_vehicle_msgs.msg import (BrakeCtrl, DriveCtrl, SteerCtrl, VehicleCtrl, WheelTorqueCtrl)
+from autoware_auto_control_msgs.msg import AckermannControlCommand
+from autoware_auto_vehicle_msgs.msg import GearCommand
+from tier4_control_msgs.msg import GateMode
+from tier4_vehicle_msgs.msg import VehicleEmergencyStamped
+from autoware_auto_vehicle_msgs.msg import TurnIndicatorsCommand
+from autoware_auto_vehicle_msgs.msg import HazardLightsCommand
+from tier4_vehicle_msgs.msg import ActuationCommandStamped
 
 from pix_dataclass.BrakeCtrlData import BrakeCtrlData
 from pix_dataclass.DriveCtrlData import DriveCtrlData
@@ -26,20 +32,30 @@ class CANCommandNode(Node):
         self.vehicle_ctrl_data = VehicleCtrlData()
         self.wheel_ctrl_data = WheelTorqueCtrlData()
 
-        self.sub_drive_ctrl_data = self.create_subscription(DriveCtrl, 'Vehicle/Pix/drive_ctrl_data',
-                                                            self.dispatch_command, 10)
+        self.sub_ackermann_ctrl_cmd = self.create_subscription(AckermannControlCommand, '/control/command/control_cmd',
+                                                               self.dispatch_command, 10)
 
-        self.sub_brake_ctrl_data = self.create_subscription(BrakeCtrl, 'Vehicle/Pix/brake_ctrl_data',
-                                                            self.dispatch_command, 10)
+        self.sub_gear_ctrl_cmd = self.create_subscription(GearCommand, '/control/command/gear_cmd',
+                                                          self.dispatch_command, 10)
 
-        self.sub_steer_ctrl_data = self.create_subscription(SteerCtrl, 'Vehicle/Pix/steer_ctrl_data',
-                                                            self.dispatch_command, 10)
+        self.sub_gate_mode_ctrl_cmd = self.create_subscription(GateMode, '/control/current_gate_mode',
+                                                               self.dispatch_command, 10)
 
-        self.sub_vehicle_ctrl_data = self.create_subscription(VehicleCtrl, 'Vehicle/Pix/vehicle_ctrl_data',
-                                                              self.dispatch_command, 10)
+        self.sub_vehicle_emergency_ctrl_cmd = self.create_subscription(VehicleEmergencyStamped,
+                                                                       '/control/current_gate_mode',
+                                                                       self.dispatch_command, 10)
 
-        self.sub_wheel_ctrl_data = self.create_subscription(WheelTorqueCtrl, 'Vehicle/Pix/wheel_ctrl_data',
-                                                            self.dispatch_command, 10)
+        self.sub_turn_indicators_ctrl_cmd = self.create_subscription(TurnIndicatorsCommand,
+                                                                     '/control/command/turn_indicators_cmd',
+                                                                     self.dispatch_command, 10)
+
+        self.sub_turn_hazard_lights_ctrl_cmd = self.create_subscription(HazardLightsCommand,
+                                                                        '/control/command/hazard_lights_cmd',
+                                                                        self.dispatch_command, 10)
+
+        self.sub_actuation_ctrl_cmd = self.create_subscription(ActuationCommandStamped,
+                                                               '/control/command/actuation_cmd',
+                                                               self.dispatch_command, 10)
 
         self.drive_ctrl_send_timer = self.create_timer(0.02, self.drive_ctrl_data_timer_callback)
         self.brake_ctrl_send_timer = self.create_timer(0.02, self.brake_ctrl_data_timer_callback)
@@ -49,61 +65,110 @@ class CANCommandNode(Node):
 
     def dispatch_command(self, msg):
 
-        if isinstance(msg, DriveCtrl):
+        if isinstance(msg, AckermannControlCommand):
             command_data = {
-                'vehicle_drive_control_enable': msg.vehicle_drive_control_enable,
-                'drive_mode_control': msg.drive_mode_control,
-                'gear_control': msg.gear_control,
-                'vehicle_speed_control': msg.vehicle_speed_control,
-                'vehicle_throttle_control': msg.vehicle_throttle_control,
-            }
-
-            self.drive_ctrl_data.update_value(**command_data)
-
-        elif isinstance(msg, BrakeCtrl):
-            command_data = {
-                'vehicle_brake_control_enable': msg.vehicle_brake_control_enable,
-                'vehicle_brake_light_control': msg.vehicle_brake_light_control,
-                'vehicle_brake_control': msg.vehicle_brake_control,
-                'parking_control': msg.parking_control,
-            }
-
-            self.brake_ctrl_data.update_value(**command_data)
-
-        elif isinstance(msg, SteerCtrl):
-            command_data = {
-                'vehicle_steering_control_enable': msg.vehicle_steering_control_enable,
-                'steering_mode_control': msg.steering_mode_control,
-                'vehicle_steering_control_front': msg.vehicle_steering_control_front,
-                'vehicle_steering_control_rear': msg.vehicle_steering_control_rear,
-                'vehicle_steering_wheel_speed_control': msg.vehicle_steering_wheel_speed_control,
+                'vehicle_steering_control_enable': 1,
+                # only use front ackermann
+                'steering_mode_control': 0,
+                'vehicle_steering_control_front': msg.lateral.steering_tire_angle,
+                'vehicle_steering_control_rear': 0,
+                'vehicle_steering_wheel_speed_control': msg.longitudinal.LongitudinalCommand.speed,
             }
 
             self.steer_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, VehicleCtrl):
-
+        elif isinstance(msg, GearCommand):
             command_data = {
-                'position_light_control': msg.position_light_control,
-                'low_light_control': msg.low_light_control,
-                'left_turn_light_control': msg.left_turn_light_control,
-                'right_turn_light_control': msg.right_turn_light_control,
-                'speed_limit_control': msg.speed_limit_control,
-                'speed_limit': msg.speed_limit,
-                'check_mode_enable': msg.check_mode_enable,
+                'vehicle_drive_control_enable': 1,
+                'drive_mode_control': 1,
+                'gear_control': msg.command,
+                'vehicle_speed_control': 0.00,
+                'vehicle_throttle_control': 0.0,
             }
-            self.vehicle_ctrl_data.update_value(**command_data)
+            self.drive_ctrl_data.update_value(**command_data)
 
-        elif isinstance(msg, WheelTorqueCtrl):
+        elif isinstance(msg, GateMode):
+            pass
+
+        elif isinstance(msg, VehicleEmergencyStamped):
+            # TODO: Apply emergency braking system and parking brake using BrakeCtrlDataclass and DriveCtrlDataClass.
+            pass
+
+        elif isinstance(msg, TurnIndicatorsCommand):
+            #       const uint8 NO_COMMAND = 0;
+            #       const uint8 DISABLE = 1;
+            #       const uint8 ENABLE_LEFT = 2;
+            #       const uint8 ENABLE_RIGHT = 3;
+
+            left_turn_light_control = 0
+            right_turn_light_control = 0
+
+            if msg.command == 2:
+                left_turn_light_control = 1
+            elif msg.command == 3:
+                right_turn_light_control = 1
 
             command_data = {
-                'left_front_motor_torque': msg.left_front_motor_torque,
-                'right_front_motor_torque': msg.right_front_motor_torque,
-                'left_rear_motor_torque': msg.left_rear_motor_torque,
-                'right_rear_motor_torque': msg.right_rear_motor_torque,
+                'position_light_control': 1,
+                'low_light_control': 0,
+                'left_turn_light_control': left_turn_light_control,
+                'right_turn_light_control': right_turn_light_control,
+                'speed_limit_control': 0,
+                'speed_limit': 0,
+                'check_mode_enable': 0,
+            }
+
+            self.VehicleCtrlData.update_value(**command_data)
+
+        elif isinstance(msg, HazardLightsCommand):
+            #       const uint8 NO_COMMAND = 0;
+            #       const uint8 DISABLE = 1;
+            #       const uint8 ENABLE = 2;
+
+            left_turn_light_control = 0
+            right_turn_light_control = 0
+
+            if msg.command == 2:
+                left_turn_light_control = 1
+                right_turn_light_control = 1
+
+            command_data = {
+                'position_light_control': 0,
+                'low_light_control': 0,
+                'left_turn_light_control': left_turn_light_control,
+                'right_turn_light_control': right_turn_light_control,
+                'speed_limit_control': 0,
+                'speed_limit': 0,
+                'check_mode_enable': 0,
             }
 
             self.wheel_ctrl_data.update_value(**command_data)
+
+        elif isinstance(msg, ActuationCommandStamped):
+
+            command_data_acc = {
+                'vehicle_drive_control_enable': 1,
+                'drive_mode_control': 1,
+                'gear_control': 1,
+                'vehicle_speed_control': msg.actuation.accel_cmd,
+                'vehicle_throttle_control': 0,
+            }
+            command_data_brake = {
+                'vehicle_brake_control_enable': 1,
+                'vehicle_brake_light_control': 1,
+                'vehicle_brake_control': msg.actuation.brake_cmd,
+                'parking_control': 0,
+            }
+            command_data_steering = {
+                # only use front ackermann
+                'vehicle_steering_control_enable': 1,
+                'steering_mode_control': 0,
+                'vehicle_steering_control_front': int(msg.actuation.steer_cmd),
+            }
+
+            self.wheel_ctrl_data.update_value(**command_data_acc)
+            self.wheel_ctrl_data.update_value(**command_data_brake)
+            self.wheel_ctrl_data.update_value(**command_data_steering)
 
     def drive_ctrl_data_timer_callback(self):
         now = time_ns()
@@ -135,7 +200,7 @@ class CANCommandNode(Node):
     def vehicle_ctrl_data_timer_callback(self):
         now = time_ns()
 
-        if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 300000000:
+        if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 500000000:
             self.vehicle_ctrl_data.reset_data()
 
         self.can_sender.send(0x133, self.vehicle_ctrl_data.get_bytearray())

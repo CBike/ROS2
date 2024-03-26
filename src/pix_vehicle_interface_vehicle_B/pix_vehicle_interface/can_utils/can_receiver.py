@@ -27,8 +27,6 @@ class CANReceiver:
             'power_sta_fb': queue.Queue(),
             'vehicle_sta_fb': queue.Queue(),
             'vehicle_flt_sta_fb': queue.Queue(),
-            'chassis_wheel_rpm_fb': queue.Queue(),
-            'chassis_wheel_torque_fb': queue.Queue(),
         }
 
         # Thread for receiving CAN message in the background
@@ -395,7 +393,7 @@ class CANReceiver:
         parsed_data['left_turning_light_status_fb'] = left_turning_light_status_fb \
             if validate_status_fb(left_turning_light_status_fb) else 0
 
-        parsed_data['light_turning_light_status_fb'] = light_turning_light_status_fb \
+        parsed_data['right_turning_light_status_fb'] = light_turning_light_status_fb \
             if validate_status_fb(light_turning_light_status_fb) else 0
 
         parsed_data['hazard_warning_light_switch_status'] = hazard_warning_light_switch_status \

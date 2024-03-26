@@ -53,7 +53,7 @@ class CANReceiverNode(Node):
         if get_msg is not None:
             pub_msg = BatteryStatus()
             pub_msg.energy_level = get_msg['energy_level']
-            self.drive_sta_fb_publisher.publish(pub_msg)
+            self.battery_rpt_publisher.publish(pub_msg)
         else:
             pass
 
@@ -73,7 +73,7 @@ class CANReceiverNode(Node):
             pub_msg = ControlModeReport()
             pub_msg.mode = get_msg['mode']
 
-            self.brake_sta_fb_publisher.publish(pub_msg)
+            self.control_mode_rpt_publisher.publish(pub_msg)
 
     def gear_rpt_timer_call_back(self):
         """
@@ -90,7 +90,7 @@ class CANReceiverNode(Node):
         if get_msg is not None:
             pub_msg = GearReport()
             pub_msg.report = get_msg['report']
-            self.steer_sta_fb_publisher.publish(pub_msg)
+            self.gear_rpt_publisher.publish(pub_msg)
 
     def hazard_lights_rpt_timer_call_back(self):
         """
@@ -104,7 +104,7 @@ class CANReceiverNode(Node):
         if get_msg is not None:
             pub_msg = HazardLightsReport()
             pub_msg.report = get_msg['report']
-            self.vehicle_work_sta_fb_publisher.publish(pub_msg)
+            self.hazard_lights_rpt_publisher.publish(pub_msg)
 
     def turn_indicators_rpt_timer_call_back(self):
         """
@@ -119,7 +119,7 @@ class CANReceiverNode(Node):
         if get_msg is not None:
             pub_msg = TurnIndicatorsReport()
             pub_msg.report = get_msg['report']
-            self.power_sta_fb_publisher.publish(pub_msg)
+            self.turn_indicators_rpt_publisher.publish(pub_msg)
 
     def steering_rpt_timer_call_back(self):
         """
@@ -129,7 +129,7 @@ class CANReceiverNode(Node):
         if get_msg is not None:
             pub_msg = SteeringReport()
             pub_msg.steering_tire_angle = get_msg['steering_tire_angle']
-            self.vehicle_sta_fb_publisher.publish(pub_msg)
+            self.steering_rpt_publisher.publish(pub_msg)
 
     def velocity_rpt_timer_call_back(self):
         """
@@ -156,7 +156,7 @@ class CANReceiverNode(Node):
             pub_msg.lateral_velocity = get_msg['lateral_velocity']
             pub_msg.heading_rate = get_msg['heading_rate']
 
-            self.vehicle_flt_sta_fb_publisher.publish(pub_msg)
+            self.velocity_rpt_publisher.publish(pub_msg)
 
 
 def main(args=None):

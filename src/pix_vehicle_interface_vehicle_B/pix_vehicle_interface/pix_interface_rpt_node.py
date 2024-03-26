@@ -1,9 +1,11 @@
 from rclpy.node import Node
 from std_msgs.msg import Header
 from can_utils.can_receiver import CANReceiver
-from pix_vehicle_msgs.msg import (BrakeStaFb, ChassisWheelRpmFb, ChassisWheelTorqueFb, DriveStaFb,
-                                  PowerStaFb, SteerStaFb, VehicleFltStaFb, VehicleStaFb,
-                                  VehicleWorkStaFb)
+
+from tier4_vehicle_msgs.msg import BatteryStatus
+from autoware_auto_vehicle_msgs.msg import (ControlModeReport, GearReport, HazardLightsReport, TurnIndicatorsReport,
+                                            SteeringReport, VelocityReport)
+
 import rclpy
 
 
@@ -20,216 +22,141 @@ class CANReceiverNode(Node):
         self.can_receiver = CANReceiver(self.can_channel)
         self.can_receiver.start()
 
-        self.drive_sta_fb_publisher = self.create_publisher(DriveStaFb, 'pix_vehicle_report/drive_sta_fb', 10)
-        self.brake_sta_fb_publisher = self.create_publisher(BrakeStaFb, 'pix_vehicle_report/brake_sta_fb', 10)
-        self.steer_sta_fb_publisher = self.create_publisher(SteerStaFb, 'pix_vehicle_report/steer_sta_fb', 10)
+        self.battery_rpt_publisher = self.create_publisher(BatteryStatus, '/vehicle/status/battery_charge', 10)
+        self.control_mode_rpt_publisher = self.create_publisher(ControlModeReport, '/vehicle/status/control_mode', 10)
+        self.gear_rpt_publisher = self.create_publisher(GearReport, '/vehicle/status/gear_status', 10)
 
-        self.vehicle_work_sta_fb_publisher = self.create_publisher(VehicleWorkStaFb,
-                                                                   'pix_vehicle_report/vehicle_work_sta_fb', 10)
+        self.hazard_lights_rpt_publisher = self.create_publisher(HazardLightsReport,
+                                                                 '/vehicle/status/hazard_lights_status', 10)
 
-        self.power_sta_fb_publisher = self.create_publisher(PowerStaFb, 'pix_vehicle_report/power_sta_fb', 10)
+        self.turn_indicators_rpt_publisher = self.create_publisher(TurnIndicatorsReport,
+                                                                   '/vehicle/status/turn_indicators_status', 10)
 
-        self.vehicle_sta_fb_publisher = self.create_publisher(VehicleStaFb, 'pix_vehicle_report/vehicle_sta_fb', 10)
+        self.steering_rpt_publisher = self.create_publisher(SteeringReport, '/vehicle/status/steering_status', 10)
 
-        self.vehicle_flt_sta_fb_publisher = self.create_publisher(VehicleFltStaFb,
-                                                                  'pix_vehicle_report/vehicle_flt_sta_fb', 10)
+        self.velocity_rpt_publisher = self.create_publisher(VelocityReport, '/vehicle/status/velocity_Status', 10)
 
-        self.chassis_wheel_rpm_fb_publisher = self.create_publisher(ChassisWheelRpmFb,
-                                                                    'pix_vehicle_report/chassis_wheel_rpm_fb', 10)
+        self.battery_rpt_publisher = self.create_timer(0.2, self.battery_rpt_timer_call_back)
+        self.control_mode_rpt_publisher = self.create_timer(0.02, self.control_mode_rpt_timer_call_back)
+        self.gear_rpt_publisher = self.create_timer(0.02, self.gear_rpt_timer_call_back)
+        self.hazard_lights_rpt_publisher = self.create_timer(0.2, self.hazard_lights_rpt_timer_call_back)
+        self.turn_indicators_rpt_publisher = self.create_timer(0.2, self.turn_indicators_rpt_timer_call_back)
+        self.steering_rpt_publisher = self.create_timer(0.2, self.steering_rpt_timer_call_back)
+        self.velocity_rpt_publisher = self.create_timer(0.2, self.velocity_rpt_timer_call_back)
 
-        self.chassis_wheel_torque_fb_publisher = self.create_publisher(ChassisWheelTorqueFb,
-                                                                       'pix_vehicle_report/chassis_wheel_torque_fb', 10)
-
-        self.drive_sta_fb_timer = self.create_timer(0.02, self.drive_sta_fb_timer_call_back)
-        self.brake_sta_fb_timer = self.create_timer(0.02, self.brake_sta_fb_timer_call_back)
-        self.steer_sta_fb_timer = self.create_timer(0.02, self.steer_sta_fb_timer_call_back)
-        self.vehicle_work_sta_fb_timer = self.create_timer(0.2, self.vehicle_work_sta_fb_timer_call_back)
-        self.power_sta_fb_timer = self.create_timer(0.2, self.power_sta_fb_timer_call_back)
-        self.vehicle_sta_fb_timer = self.create_timer(0.2, self.vehicle_sta_fb_timer_call_back)
-        self.vehicle_flt_sta_fb_timer = self.create_timer(0.2, self.vehicle_flt_sta_fb_timer_call_back)
-        self.chassis_wheel_rpm_fb_timer = self.create_timer(0.02, self.chassis_wheel_rpm_fb_timer_call_back)
-        self.chassis_wheel_torque_fb_timer = self.create_timer(0.02, self.chassis_wheel_torque_fb_timer_call_back)
-
-    def drive_sta_fb_timer_call_back(self):
+    def battery_rpt_timer_call_back(self):
         """
         Publishes ThrottleReport messages based on parsed CAN data.
         """
 
-        get_msg = self.can_receiver.get_report('drive_sta_fb')
+        get_msg = self.can_receiver.get_report('battery_rpt')
         if get_msg is not None:
-            pub_msg = DriveStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_drive_sta_fb"
-
-            pub_msg.drive_en_state = get_msg['drive_en_state']
-            pub_msg.reminder_for_drive_control_out_of_bounds = get_msg['reminder_for_drive_control_out_of_bounds']
-            pub_msg.drive_mode_fb = get_msg['drive_mode_fb']
-            pub_msg.gear_status = get_msg['gear_status']
-            pub_msg.actual_speed_fb = get_msg['actual_speed_fb']
-            pub_msg.throttle_request_val_fb = get_msg['throttle_request_val_fb']
-            pub_msg.vehicle_accel = get_msg['vehicle_accel']
-            pub_msg.vcu_cycle_count = get_msg['vcu_cycle_count']
-
+            pub_msg = BatteryStatus()
+            pub_msg.energy_level = get_msg['energy_level']
             self.drive_sta_fb_publisher.publish(pub_msg)
         else:
             pass
 
-    def brake_sta_fb_timer_call_back(self):
+    def control_mode_rpt_timer_call_back(self):
         """
          Publishes BrakeReport messages based on parsed CAN data.
+               const uint8 NO_COMMAND = 0;
+               const uint8 AUTONOMOUS = 1;
+               const uint8 AUTONOMOUS_STEER_ONLY = 2;
+               const uint8 AUTONOMOUS_VELOCITY_ONLY = 3;
+               const uint8 MANUAL = 4;
+               const uint8 DISENGAGED = 5;
+               const uint8 NOT_READY = 6;
          """
-        get_msg = self.can_receiver.get_report('brake_sta_fb')
+        get_msg = self.can_receiver.get_report('control_mode_rpt')
         if get_msg is not None:
-            pub_msg = BrakeStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_brake_sta_fb"
-            pub_msg.brake_en_state = get_msg['brake_en_state']
-            pub_msg.brake_light_en_state = get_msg['brake_light_en_state']
-            pub_msg.parking_state = get_msg['parking_state']
-            pub_msg.brake_pedal_val_fb = get_msg['brake_pedal_val_fb']
-            pub_msg.brake_pressure_fb = get_msg['brake_pressure_fb']
-            pub_msg.vcu_cycle_count = get_msg['vcu_cycle_count']
+            pub_msg = ControlModeReport()
+            pub_msg.mode = get_msg['mode']
+
             self.brake_sta_fb_publisher.publish(pub_msg)
 
-    def steer_sta_fb_timer_call_back(self):
+    def gear_rpt_timer_call_back(self):
         """
         Publishes SteerReport messages based on parsed CAN data.
+            module GearReport_Constants {
+              const uint8 NONE = 0;
+              const uint8 NEUTRAL = 1;
+              const uint8 DRIVE = 2;
+              const uint8 REVERSE = 20;
+              const uint8 PARK = 22;
+            };
         """
-        get_msg = self.can_receiver.get_report('steer_sta_fb')
+        get_msg = self.can_receiver.get_report('gear_rpt')
         if get_msg is not None:
-            pub_msg = SteerStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_steer_sta_fb"
-            pub_msg.steering_en_state = get_msg['steering_en_state']
-            pub_msg.steering_control_out_of_bounds_reminder = get_msg['steering_control_out_of_bounds_reminder']
-            pub_msg.steering_mode_fb = get_msg['steering_mode_fb']
-            pub_msg.front_steering_angle_fb = get_msg['front_steering_angle_fb']
-            pub_msg.rear_steering_angle_fb = get_msg['rear_steering_angle_fb']
-            pub_msg.set_steering_angle_speed_fb = get_msg['set_steering_angle_speed_fb']
-            pub_msg.vcu_cycle_count = get_msg['vcu_cycle_count']
-
+            pub_msg = GearReport()
+            pub_msg.report = get_msg['report']
             self.steer_sta_fb_publisher.publish(pub_msg)
 
-    def vehicle_work_sta_fb_timer_call_back(self):
+    def hazard_lights_rpt_timer_call_back(self):
         """
         Publishes GearReport messages based on parsed CAN data.
+            module HazardLightsReport_Constants {
+              const uint8 DISABLE = 1;
+              const uint8 ENABLE = 2;
+            }
         """
-        get_msg = self.can_receiver.get_report('vehicle_work_sta_fb')
+        get_msg = self.can_receiver.get_report('hazard_lights_rpt')
         if get_msg is not None:
-            pub_msg = VehicleWorkStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_vehicle_work_sta_fb"
-            pub_msg.drive_mode_fb = get_msg['drive_mode_fb']
-            pub_msg.vehicle_power_on_status_fb = get_msg['vehicle_power_on_status_fb']
-            pub_msg.dc_working_status = get_msg['dc_working_status']
-            pub_msg.vehicle_speed_limit_status = get_msg['vehicle_speed_limit_status']
-            pub_msg.vehicle_speed_limit_val_fb = get_msg['vehicle_speed_limit_val_fb']
-            pub_msg.low_voltage_battery_voltage = get_msg['low_voltage_battery_voltage']
-            pub_msg.emergency_stop_status_fb = get_msg['emergency_stop_status_fb']
-            pub_msg.vehicle_power_battery = get_msg['vehicle_power_battery']
-            pub_msg.vehicle_rear_crash_sensor_feedback = get_msg['vehicle_rear_crash_sensor_feedback']
-            pub_msg.vcu_cycle_count = get_msg['vcu_cycle_count']
-            pub_msg.vcu_checksum = get_msg['vcu_checksum']
+            pub_msg = HazardLightsReport()
+            pub_msg.report = get_msg['report']
             self.vehicle_work_sta_fb_publisher.publish(pub_msg)
 
-    def power_sta_fb_timer_call_back(self):
+    def turn_indicators_rpt_timer_call_back(self):
         """
         Publishes ParkReport messages based on parsed CAN data.
+            module TurnIndicatorsReport_Constants {
+              const uint8 DISABLE = 1;
+              const uint8 ENABLE_LEFT = 2;
+              const uint8 ENABLE_RIGHT = 3;
+            };
         """
-        get_msg = self.can_receiver.get_report('power_sta_fb')
+        get_msg = self.can_receiver.get_report('turn_indicators_rpt')
         if get_msg is not None:
-            pub_msg = PowerStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_power_sta_fb"
-            pub_msg.vehicle_charge_status = get_msg['vehicle_charge_status']
-            pub_msg.vehicle_power_battery_electricity_amount = get_msg['vehicle_power_battery_electricity_amount']
-            pub_msg.vehicle_power_battery_voltage = get_msg['vehicle_power_battery_voltage']
-            pub_msg.vehicle_power_battery_current = get_msg['vehicle_power_battery_current']
-            pub_msg.bms_maximum_monomer_temperature = get_msg['bms_maximum_monomer_temperature']
+            pub_msg = TurnIndicatorsReport()
+            pub_msg.report = get_msg['report']
             self.power_sta_fb_publisher.publish(pub_msg)
 
-    def vehicle_sta_fb_timer_call_back(self):
+    def steering_rpt_timer_call_back(self):
         """
         Publishes VcuReport messages based on parsed CAN data.
         """
-        get_msg = self.can_receiver.get_report('vehicle_sta_fb')
+        get_msg = self.can_receiver.get_report('steering_rpt')
         if get_msg is not None:
-            pub_msg = VehicleStaFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_vehicle_sta_fb"
-            pub_msg.position_light_status_fb = get_msg['position_light_status_fb']
-            pub_msg.low_light_status_fb = get_msg['low_light_status_fb']
-            pub_msg.left_turning_light_status_fb = get_msg['left_turning_light_status_fb']
-            pub_msg.light_turning_light_status_fb = get_msg['light_turning_light_status_fb']
-            pub_msg.hazard_warning_light_switch_status = get_msg['hazard_warning_light_switch_status']
+            pub_msg = SteeringReport()
+            pub_msg.steering_tire_angle = get_msg['steering_tire_angle']
             self.vehicle_sta_fb_publisher.publish(pub_msg)
 
-    def vehicle_flt_sta_fb_timer_call_back(self):
+    def velocity_rpt_timer_call_back(self):
         """
         Publishes WheelSpeedReport messages based on parsed CAN data.
+            struct VelocityReport {
+              std_msgs::msg::Header header;
+              @default (value=0.0)
+              float longitudinal_velocity;
+
+              @default (value=0.0)
+              float lateral_velocity;
+
+              @default (value=0.0)
+              float heading_rate;
+              }
         """
-        get_msg = self.can_receiver.get_report('vehicle_flt_sta_fb')
+        get_msg = self.can_receiver.get_report('velocity_rpt')
         if get_msg is not None:
-            pub_msg = VehicleFltStaFb()
+            pub_msg = VelocityReport()
             pub_msg.header = Header()
             pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_vehicle_flt_sta_fb"
-            pub_msg.motor_system_overheating = get_msg['motor_system_overheating']
-            pub_msg.battery_system_overheating = get_msg['battery_system_overheating']
-            pub_msg.brake_system_overheating = get_msg['brake_system_overheating']
-            pub_msg.steering_system_overheating = get_msg['steering_system_overheating']
-            pub_msg.battery_voltage_is_too_low = get_msg['battery_voltage_is_too_low']
-            pub_msg.system_error = get_msg['system_error']
-            pub_msg.brake_system_failure = get_msg['brake_system_failure']
-            pub_msg.parking_system_failure = get_msg['parking_system_failure']
-            pub_msg.front_steering_system_fault = get_msg['front_steering_system_fault']
-            pub_msg.rear_steering_system_failure = get_msg['rear_steering_system_failure']
-            pub_msg.left_front_motor_system_failure = get_msg['left_front_motor_system_failure']
-            pub_msg.right_front_motor_system_failure = get_msg['right_front_motor_system_failure']
-            pub_msg.left_rear_motor_system_failure = get_msg['left_rear_motor_system_failure']
-            pub_msg.right_rear_motor_system_failure = get_msg['right_rear_motor_system_failure']
-            pub_msg.bms_system_failure = get_msg['bms_system_failure']
-            pub_msg.dc_system_failure = get_msg['dc_system_failure']
+            pub_msg.header.frame_id = "velocity_rpt"
+            pub_msg.longitudinal_velocity = get_msg['longitudinal_velocity']
+            pub_msg.lateral_velocity = get_msg['lateral_velocity']
+            pub_msg.heading_rate = get_msg['heading_rate']
+
             self.vehicle_flt_sta_fb_publisher.publish(pub_msg)
-
-    def chassis_wheel_rpm_fb_timer_call_back(self):
-        """
-        Publishes BmsReport messages based on parsed CAN data.
-        """
-        get_msg = self.can_receiver.get_report('chassis_wheel_rpm_fb')
-        if get_msg is not None:
-            pub_msg = ChassisWheelRpmFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.left_front_wheel_speed = get_msg['left_front_wheel_speed']
-            pub_msg.right_front_wheel_speed = get_msg['right_front_wheel_speed']
-            pub_msg.left_rear_wheel_speed = get_msg['left_rear_wheel_speed']
-            pub_msg.right_rear_wheel_speed = get_msg['right_rear_wheel_speed']
-            pub_msg.header.frame_id = "report_chassis_wheel_rpm_fb"
-
-            self.chassis_wheel_rpm_fb_publisher.publish(pub_msg)
-
-    def chassis_wheel_torque_fb_timer_call_back(self):
-        """
-        Publishes BmsReport messages based on parsed CAN data.
-        """
-        get_msg = self.can_receiver.get_report('chassis_wheel_torque_fb')
-        if get_msg is not None:
-            pub_msg = ChassisWheelTorqueFb()
-            pub_msg.header = Header()
-            pub_msg.header.stamp = self.get_clock().now().to_msg()
-            pub_msg.header.frame_id = "report_chassis_wheel_torque_fb"
-            pub_msg.left_front_wheel_torque = get_msg['left_front_wheel_torque']
-            pub_msg.right_front_wheel_torque = get_msg['right_front_wheel_torque']
-            pub_msg.left_rear_wheel_torque = get_msg['left_rear_wheel_torque']
-            pub_msg.right_rear_wheel_torque = get_msg['right_rear_wheel_torque']
-            self.chassis_wheel_torque_fb_publisher.publish(pub_msg)
 
 
 def main(args=None):

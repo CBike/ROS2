@@ -31,4 +31,4 @@ int8 vehicle_rear_crash_sensor_feedback
 int8 vcu_cycle_count 0
 
 # [] [] byte0 xor byte1 xor...byte6
-int8 vcu_checksum 0
+int32 vcu_checksum 0

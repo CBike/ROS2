@@ -161,6 +161,7 @@ class CANReceiverNode(Node):
         Publishes WheelSpeedReport messages based on parsed CAN data.
             struct VelocityReport {
               std_msgs::msg::Header header;
+
               @default (value=0.0)
               float longitudinal_velocity;
 

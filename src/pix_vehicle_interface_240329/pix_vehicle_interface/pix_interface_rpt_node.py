@@ -112,13 +112,14 @@ class CANReceiverNode(Node):
 
             left_turning_light_status = (unpack('<B', data[0:1])[0] >> 2) & 0b00000001
             right_turning_light_status = (unpack('<B', data[0:1])[0] >> 3) & 0b00000001
-            self.msg_obj_indicators_rpt.report = 0
             self.msg_obj_hazardLights_rpt.report = ((unpack('<B', data[0:1])[0] >> 6) & 0b00000001) + 1
 
             if left_turning_light_status == 1:
                 self.msg_obj_indicators_rpt.report = 3
             elif right_turning_light_status == 1:
                 self.msg_obj_indicators_rpt.report = 2
+            else:
+                self.msg_obj_indicators_rpt.report = 0
 
             self.turn_indicators_rpt_publisher.publish(self.msg_obj_indicators_rpt)
             self.hazard_lights_rpt_publisher.publish(self.msg_obj_hazardLights_rpt)

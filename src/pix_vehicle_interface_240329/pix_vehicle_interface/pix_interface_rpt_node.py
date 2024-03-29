@@ -39,7 +39,7 @@ class CANReceiverNode(Node):
         self.turn_indicators_rpt_publisher = self.create_publisher(TurnIndicatorsReport,
                                                                    '/vehicle/status/turn_indicators_status', 10)
         self.steering_rpt_publisher = self.create_publisher(SteeringReport, '/vehicle/status/steering_status', 10)
-        self.velocity_rpt_publisher = self.create_publisher(VelocityReport, '/vehicle/status/velocity_Status', 10)
+        self.velocity_rpt_publisher = self.create_publisher(VelocityReport, '/vehicle/status/velocity_status', 10)
         self.start()
 
     def start(self):

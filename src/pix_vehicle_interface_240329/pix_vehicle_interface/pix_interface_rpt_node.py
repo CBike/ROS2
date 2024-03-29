@@ -67,11 +67,11 @@ class CANReceiverNode(Node):
                     pass
                 # TODO : Requires processing when the message contains a remote request frame
                 if not message.is_extended_id and message.dlc == 8 and not message.is_remote_frame:
-                    self.process_can_data(can_id, data)
+                    self.process_can_data_and_publish(can_id, data)
             except can.CanError as _:
                 pass
 
-    def process_can_data(self, can_id, data):
+    def process_can_data_and_publish(self, can_id, data):
         if can_id == 0x530:
             gear_status = (unpack('<B', data[0:1])[0] >> 4) & 0b00000011
 
@@ -129,6 +129,7 @@ class CANReceiverNode(Node):
             pass
         elif can_id == 0x542:
             pass
+
 
 def main(args=None):
     rclpy.init(args=args)

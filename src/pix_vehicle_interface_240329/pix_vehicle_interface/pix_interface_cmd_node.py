@@ -42,7 +42,7 @@ class CANCommandNode(Node):
                                                                self.dispatch_command, 10)
 
         self.sub_vehicle_emergency_ctrl_cmd = self.create_subscription(VehicleEmergencyStamped,
-                                                                       '/control/current_gate_mode',
+                                                                       '/control/command/emergency_cmd',
                                                                        self.dispatch_command, 10)
 
         self.sub_turn_indicators_ctrl_cmd = self.create_subscription(TurnIndicatorsCommand,
@@ -128,7 +128,7 @@ class CANCommandNode(Node):
                 'check_mode_enable': 0,
             }
 
-            self.VehicleCtrlData.update_value(**command_data)
+            self.vehicle_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, HazardLightsCommand):
             #       const uint8 NO_COMMAND = 0;
@@ -152,7 +152,7 @@ class CANCommandNode(Node):
                 'check_mode_enable': 0,
             }
 
-            self.VehicleCtrlData.update_value(**command_data)
+            self.vehicle_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, ActuationCommandStamped):
 
@@ -176,8 +176,8 @@ class CANCommandNode(Node):
                 'vehicle_steering_control_front': int(msg.actuation.steer_cmd),
             }
 
-            self.wheel_ctrl_data.update_value(**command_data_acc)
-            self.wheel_ctrl_data.update_value(**command_data_brake)
+            self.drive_ctrl_data.update_value(**command_data_acc)
+            self.brake_ctrl_data.update_value(**command_data_brake)
             self.wheel_ctrl_data.update_value(**command_data_steering)
 
     def drive_ctrl_data_timer_callback(self):

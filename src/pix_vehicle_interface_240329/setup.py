@@ -36,6 +36,7 @@ setup(
         'console_scripts': [
             'pix_interface_rpt = pix_vehicle_interface.pix_interface_rpt_node:main',
             'pix_interface_cmd = pix_vehicle_interface.pix_interface_cmd_node:main',
+            'pix_test = pix_vehicle_interface.test_cmd:main',
         ],
     },
 )

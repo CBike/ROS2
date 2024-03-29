@@ -72,19 +72,29 @@ class CANCommandNode(Node):
                 'steering_mode_control': 0,
                 'vehicle_steering_control_front': msg.lateral.steering_tire_angle,
                 'vehicle_steering_control_rear': 0,
-                'vehicle_steering_wheel_speed_control': msg.longitudinal.LongitudinalCommand.speed,
+                'vehicle_steering_wheel_speed_control': 480,
             }
 
             self.steer_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, GearCommand):
+            if msg.command == 1:
+                gear_command = 2
+            elif 2 <= msg.command <= 19:
+                gear_command = 1
+            elif 20 <= msg.command <= 21:
+                gear_command = 3
+            else:
+                gear_command = 0
+
             command_data = {
                 'vehicle_drive_control_enable': 1,
                 'drive_mode_control': 1,
-                'gear_control': msg.command,
+                'gear_control': gear_command,
                 'vehicle_speed_control': 0.00,
                 'vehicle_throttle_control': 0.0,
             }
+
             self.drive_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, GateMode):
@@ -142,7 +152,7 @@ class CANCommandNode(Node):
                 'check_mode_enable': 0,
             }
 
-            self.wheel_ctrl_data.update_value(**command_data)
+            self.VehicleCtrlData.update_value(**command_data)
 
         elif isinstance(msg, ActuationCommandStamped):
 
@@ -150,13 +160,13 @@ class CANCommandNode(Node):
                 'vehicle_drive_control_enable': 1,
                 'drive_mode_control': 1,
                 'gear_control': 1,
-                'vehicle_speed_control': msg.actuation.accel_cmd,
+                'vehicle_speed_control': float(msg.actuation.accel_cmd),
                 'vehicle_throttle_control': 0,
             }
             command_data_brake = {
                 'vehicle_brake_control_enable': 1,
-                'vehicle_brake_light_control': 1,
-                'vehicle_brake_control': msg.actuation.brake_cmd,
+                'vehicle_brake_light_control': 1 if msg.actuation.brake_cmd > 0 else 0,
+                'vehicle_brake_control': float(msg.actuation.brake_cmd),
                 'parking_control': 0,
             }
             command_data_steering = {

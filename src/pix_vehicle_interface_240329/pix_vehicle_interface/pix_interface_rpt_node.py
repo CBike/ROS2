@@ -115,9 +115,9 @@ class CANReceiverNode(Node):
             self.msg_obj_hazardLights_rpt.report = ((unpack('<B', data[0:1])[0] >> 6) & 0b00000001) + 1
 
             if left_turning_light_status == 1:
-                self.msg_obj_indicators_rpt.report = 3
-            elif right_turning_light_status == 1:
                 self.msg_obj_indicators_rpt.report = 2
+            elif right_turning_light_status == 1:
+                self.msg_obj_indicators_rpt.report = 3
             else:
                 self.msg_obj_indicators_rpt.report = 0
 

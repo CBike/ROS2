@@ -40,6 +40,7 @@ class CANReceiverNode(Node):
                                                                    '/vehicle/status/turn_indicators_status', 10)
         self.steering_rpt_publisher = self.create_publisher(SteeringReport, '/vehicle/status/steering_status', 10)
         self.velocity_rpt_publisher = self.create_publisher(VelocityReport, '/vehicle/status/velocity_Status', 10)
+        self.start()
 
     def start(self):
         self.running = True
@@ -71,7 +72,7 @@ class CANReceiverNode(Node):
                 pass
 
     def process_can_data(self, can_id, data):
-        if can_id == '0x530':
+        if can_id == 0x530:
             gear_status = (unpack('<B', data[0:1])[0] >> 4) & 0b00000011
 
             if gear_status == 0 or gear_status == 2:
@@ -88,26 +89,30 @@ class CANReceiverNode(Node):
             self.gear_rpt_publisher.publish(self.msg_obj_gear_rpt)
             self.velocity_rpt_publisher.publish(self.msg_obj_velocity_rpt)
 
-        elif can_id == '0x531':
+        elif can_id == 0x531:
             pass
-        elif can_id == '0x532':
-            self.msg_obj_steering_rpt.steering_tire_angle = unpack('<h', data[1:3])[0]
+        elif can_id == 0x532:
+            self.msg_obj_steering_rpt.steering_tire_angle = float(unpack('<h', data[1:3])[0])
             self.steering_rpt_publisher.publish(self.msg_obj_steering_rpt)
-        elif can_id == '0x534':
+        elif can_id == 0x534:
+
             control_mode = unpack('<B', data[0:1])[0] & 0b00000011
+
             if control_mode == 2 or control_mode == 3:
-                self.msg_obj_control_mode_rpt.report = 4
+                self.msg_obj_control_mode_rpt.mode = 4
             else:
-                self.msg_obj_control_mode_rpt.report = control_mode
+                self.msg_obj_control_mode_rpt.mode = control_mode
 
             self.control_mode_rpt_publisher.publish(self.msg_obj_control_mode_rpt)
-        elif can_id == '0x535':
+        elif can_id == 0x535:
             self.msg_obj_battery_rpt.energy_level = float(unpack('<B', data[1:2])[0])
-        elif can_id == '0x536':
+
+        elif can_id == 0x536:
 
             left_turning_light_status = (unpack('<B', data[0:1])[0] >> 2) & 0b00000001
             right_turning_light_status = (unpack('<B', data[0:1])[0] >> 3) & 0b00000001
-            self.msg_obj_hazardLights_rpt.report = (unpack('<B', data[0:1])[0] >> 6) & 0b00000001
+
+            self.msg_obj_hazardLights_rpt.report = ((unpack('<B', data[0:1])[0] >> 6) & 0b00000001) + 1
 
             if left_turning_light_status == 1:
                 self.msg_obj_indicators_rpt.report = 3
@@ -116,11 +121,11 @@ class CANReceiverNode(Node):
 
             self.turn_indicators_rpt_publisher.publish(self.msg_obj_indicators_rpt)
             self.hazard_lights_rpt_publisher.publish(self.msg_obj_hazardLights_rpt)
-        elif can_id == '0x537':
+        elif can_id == 0x537:
             pass
-        elif can_id == '0x539':
+        elif can_id == 0x539:
             pass
-        elif can_id == '0x542':
+        elif can_id == 0x542:
             pass
 
 def main(args=None):

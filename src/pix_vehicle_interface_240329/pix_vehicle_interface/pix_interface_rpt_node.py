@@ -106,12 +106,13 @@ class CANReceiverNode(Node):
             self.control_mode_rpt_publisher.publish(self.msg_obj_control_mode_rpt)
         elif can_id == 0x535:
             self.msg_obj_battery_rpt.energy_level = float(unpack('<B', data[1:2])[0])
+            self.battery_rpt_publisher.publish(self.msg_obj_battery_rpt)
 
         elif can_id == 0x536:
 
             left_turning_light_status = (unpack('<B', data[0:1])[0] >> 2) & 0b00000001
             right_turning_light_status = (unpack('<B', data[0:1])[0] >> 3) & 0b00000001
-
+            self.msg_obj_indicators_rpt.report = 0
             self.msg_obj_hazardLights_rpt.report = ((unpack('<B', data[0:1])[0] >> 6) & 0b00000001) + 1
 
             if left_turning_light_status == 1:

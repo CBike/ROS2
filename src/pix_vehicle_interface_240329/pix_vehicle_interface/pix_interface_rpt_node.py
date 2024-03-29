@@ -74,15 +74,6 @@ class CANReceiverNode(Node):
     def process_can_data_and_publish(self, can_id, data):
         if can_id == 0x530:
             gear_status = (unpack('<B', data[0:1])[0] >> 4) & 0b00000011
-            longitudinal_velocity = float(unpack('<H', data[1:3])[0] * 0.01)
-            lateral_velocity = float(0.00)
-            heading_rate = float(0.0)
-
-            gear_status = gear_status if self.validate_pix_gear_status(gear_status) else 0
-            longitudinal_velocity = longitudinal_velocity if self.validate_pix_longitudinal_velocity(
-                longitudinal_velocity) else 0.00
-            lateral_velocity = lateral_velocity if self.validate_pix_lateral_velocity(lateral_velocity) else 0.00
-            heading_rate = heading_rate if self.validate_pix_heading_rate(heading_rate) else 0.0
 
             if gear_status == 0 or gear_status == 2:
                 self.msg_obj_gear_rpt.report = 1
@@ -92,9 +83,9 @@ class CANReceiverNode(Node):
                 self.msg_obj_gear_rpt.report = 20
             self.msg_obj_velocity_rpt.header.stamp = self.get_clock().now().to_msg()
             self.msg_obj_velocity_rpt.header.frame_id = "velocity_rpt"
-            self.msg_obj_velocity_rpt.longitudinal_velocity = abs(longitudinal_velocity)
-            self.msg_obj_velocity_rpt.lateral_velocity = lateral_velocity
-            self.msg_obj_velocity_rpt.heading_rate = heading_rate
+            self.msg_obj_velocity_rpt.longitudinal_velocity = abs(float(unpack('<H', data[1:3])[0] * 0.01))
+            self.msg_obj_velocity_rpt.lateral_velocity = abs(float(0.00))
+            self.msg_obj_velocity_rpt.heading_rate = abs(float(0.0))
 
             self.gear_rpt_publisher.publish(self.msg_obj_gear_rpt)
             self.velocity_rpt_publisher.publish(self.msg_obj_velocity_rpt)
@@ -102,16 +93,11 @@ class CANReceiverNode(Node):
         elif can_id == 0x531:
             pass
         elif can_id == 0x532:
-            steering_tire_angle = float(unpack('<h', data[1:3])[0])
-            steering_tire_angle = steering_tire_angle if self.validate_pix_steering_tire_angle(
-                steering_tire_angle) else 0.0
-
-            self.msg_obj_steering_rpt.steering_tire_angle = steering_tire_angle
+            self.msg_obj_steering_rpt.steering_tire_angle = float(unpack('<h', data[1:3])[0])
             self.steering_rpt_publisher.publish(self.msg_obj_steering_rpt)
         elif can_id == 0x534:
 
             control_mode = unpack('<B', data[0:1])[0] & 0b00000011
-            control_mode = control_mode if self.validate_pix_control_mode(control_mode) else 0
 
             if control_mode == 2 or control_mode == 3:
                 self.msg_obj_control_mode_rpt.mode = 4
@@ -120,26 +106,14 @@ class CANReceiverNode(Node):
 
             self.control_mode_rpt_publisher.publish(self.msg_obj_control_mode_rpt)
         elif can_id == 0x535:
-            energy_level = float(unpack('<B', data[1:2])[0])
-            energy_level = energy_level if self.validate_pix_energy_level(energy_level) else 0.0
-
-            self.msg_obj_battery_rpt.energy_level = energy_level
+            self.msg_obj_battery_rpt.energy_level = float(unpack('<B', data[1:2])[0])
             self.battery_rpt_publisher.publish(self.msg_obj_battery_rpt)
 
         elif can_id == 0x536:
 
             left_turning_light_status = (unpack('<B', data[0:1])[0] >> 2) & 0b00000001
             right_turning_light_status = (unpack('<B', data[0:1])[0] >> 3) & 0b00000001
-            hazard_lights_status = (unpack('<B', data[0:1])[0] >> 3) & 0b00000001
-
-            left_turning_light_status = left_turning_light_status if self.validate_pix_left_turning_light_status(
-                left_turning_light_status) else 0
-            right_turning_light_status = right_turning_light_status if self.validate_pix_hazard_lights_status(
-                right_turning_light_status) else 0
-            hazard_lights_status = hazard_lights_status if self.validate_right_turning_light_status(
-                hazard_lights_status) else 0
-
-            self.msg_obj_hazardlights_rpt.report = hazard_lights_status + 1
+            self.msg_obj_hazardLights_rpt.report = ((unpack('<B', data[0:1])[0] >> 6) & 0b00000001) + 1
 
             if left_turning_light_status == 1:
                 self.msg_obj_indicators_rpt.report = 2
@@ -156,46 +130,6 @@ class CANReceiverNode(Node):
             pass
         elif can_id == 0x542:
             pass
-
-    @staticmethod
-    def validate_pix_gear_status(val):
-        return 0 <= val <= 20
-
-    @staticmethod
-    def validate_pix_longitudinal_velocity(val):
-        return -50 <= val <= 50
-
-    @staticmethod
-    def validate_pix_lateral_velocity(val):
-        return True
-
-    @staticmethod
-    def validate_pix_heading_rate(val):
-        return True
-
-    @staticmethod
-    def validate_pix_steering_tire_angle(val):
-        return -500 <= val <= 500
-
-    @staticmethod
-    def validate_pix_control_mode(val):
-        return 0 <= val <= 3
-
-    @staticmethod
-    def validate_pix_energy_level(val):
-        return 0 <= val <= 100
-
-    @staticmethod
-    def validate_pix_left_turning_light_status(val):
-        return 0 <= val <= 1
-
-    @staticmethod
-    def validate_pix_hazard_lights_status(val):
-        return 0 <= val <= 1
-
-    @staticmethod
-    def validate_right_turning_light_status(val):
-        return 0 <= val <= 1
 
 
 def main(args=None):

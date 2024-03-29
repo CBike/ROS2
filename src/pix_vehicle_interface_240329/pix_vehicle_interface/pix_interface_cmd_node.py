@@ -159,9 +159,7 @@ class CANCommandNode(Node):
             command_data_acc = {
                 'vehicle_drive_control_enable': 1,
                 'drive_mode_control': 1,
-                'gear_control': 1,
                 'vehicle_speed_control': float(msg.actuation.accel_cmd),
-                'vehicle_throttle_control': 0,
             }
             command_data_brake = {
                 'vehicle_brake_control_enable': 1,

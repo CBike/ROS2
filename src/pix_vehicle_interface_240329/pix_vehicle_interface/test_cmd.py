@@ -61,7 +61,7 @@ class TestControlNode(Node):
         self.current_emergency_publisher.publish(msg_obj_emergency_cmd)
         self.turn_indicators_cmd_publisher.publish(msg_obj_turn_indicators_cmd)
         self.hazard_lights_cmd_publisher.publish(msg_obj_hazard_lights_cmd)
-        self.actuation_cmd_publisher.publish(msg_obj_actuation_cmd)
+        # self.actuation_cmd_publisher.publish(msg_obj_actuation_cmd)
 
 
 def main(args=None):

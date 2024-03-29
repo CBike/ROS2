@@ -176,8 +176,8 @@ class CANCommandNode(Node):
                 'vehicle_steering_control_front': int(msg.actuation.steer_cmd),
             }
 
-            self.wheel_ctrl_data.update_value(**command_data_acc)
-            self.wheel_ctrl_data.update_value(**command_data_brake)
+            self.drive_ctrl_data.update_value(**command_data_acc)
+            self.brake_ctrl_data.update_value(**command_data_brake)
             self.wheel_ctrl_data.update_value(**command_data_steering)
 
     def drive_ctrl_data_timer_callback(self):

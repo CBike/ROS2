@@ -179,45 +179,45 @@ class CANCommandNode(Node):
             self.wheel_ctrl_data.update_value(**command_data_steering)
 
     def drive_ctrl_data_timer_callback(self):
-        now = time_ns()
+        # now = time_ns()
 
-        if (now - self.drive_ctrl_data.get_value('last_update_time')) > 300000000:
-            self.drive_ctrl_data.reset_data()
+        # if (now - self.drive_ctrl_data.get_value('last_update_time')) > 300000000:
+        #     self.drive_ctrl_data.reset_data()
 
         self.drive_ctrl_data.add_cycle_count()
         self.can_sender.send(0x130, self.drive_ctrl_data.get_bytearray())
 
     def brake_ctrl_data_timer_callback(self):
-        now = time_ns()
+        # now = time_ns()
 
-        if (now - self.brake_ctrl_data.get_value('last_update_time')) > 300000000:
-            self.brake_ctrl_data.reset_data()
+        # if (now - self.brake_ctrl_data.get_value('last_update_time')) > 300000000:
+        #     self.brake_ctrl_data.reset_data()
 
         self.brake_ctrl_data.add_cycle_count()
         self.can_sender.send(0x131, self.brake_ctrl_data.get_bytearray())
 
     def steering_data_timer_callback(self):
-        now = time_ns()
+        # now = time_ns()
 
-        if (now - self.steer_ctrl_data.get_value('last_update_time')) > 300000000:
-            self.steer_ctrl_data.reset_data()
+        # if (now - self.steer_ctrl_data.get_value('last_update_time')) > 300000000:
+        #     self.steer_ctrl_data.reset_data()
 
         self.steer_ctrl_data.add_cycle_count()
         self.can_sender.send(0x132, self.steer_ctrl_data.get_bytearray())
 
     def vehicle_ctrl_data_timer_callback(self):
-        now = time_ns()
+        # now = time_ns()
 
-        if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 500000000:
-            self.vehicle_ctrl_data.reset_data()
+        # if (now - self.vehicle_ctrl_data.get_value('last_update_time')) > 500000000:
+        #     self.vehicle_ctrl_data.reset_data()
 
         self.can_sender.send(0x133, self.vehicle_ctrl_data.get_bytearray())
 
     def wheel_ctrl_data_timer_callback(self):
-        now = time_ns()
+        # now = time_ns()
 
-        if (now - self.wheel_ctrl_data.get_value("last_update_time")) > 300000000:
-            self.wheel_ctrl_data.reset_data()
+        # if (now - self.wheel_ctrl_data.get_value("last_update_time")) > 300000000:
+        #     self.wheel_ctrl_data.reset_data()
 
         self.can_sender.send(0x135, self.wheel_ctrl_data.get_bytearray())
 

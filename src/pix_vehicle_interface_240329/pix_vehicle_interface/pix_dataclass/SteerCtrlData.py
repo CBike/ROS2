@@ -62,11 +62,11 @@ class SteerCtrlData:
         vehicle_steering_control_enable = (self.vehicle_steering_control_enable, 0, 0)
         steering_mode_control = (self.steering_mode_control, 4, 7)
 
-        vehicle_steering_control_front_lower = (self.vehicle_steering_control_front & 0xFF, 8, 15)
-        vehicle_steering_control_front_upper = ((self.vehicle_steering_control_front >> 8) & 0xFF, 16, 23)
+        vehicle_steering_control_front_lower = (int(self.vehicle_steering_control_front) & 0xFF, 8, 15)
+        vehicle_steering_control_front_upper = ((int(self.vehicle_steering_control_front) >> 8) & 0xFF, 16, 23)
 
-        vehicle_steering_control_rear_lower = (self.vehicle_steering_control_rear & 0xFF, 24, 32)
-        vehicle_steering_control_rear_upper = ((self.vehicle_steering_control_rear >> 8) & 0xFF, 32, 39)
+        vehicle_steering_control_rear_lower = (int(self.vehicle_steering_control_rear) & 0xFF, 24, 32)
+        vehicle_steering_control_rear_upper = ((int(self.vehicle_steering_control_rear) >> 8) & 0xFF, 32, 39)
 
         vehicle_steering_wheel_speed_control = (self.vehicle_steering_wheel_speed_control / 2, 40, 47)
         cycle_count = (self.cycle_count, 48, 51)

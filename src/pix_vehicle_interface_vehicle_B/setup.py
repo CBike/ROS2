@@ -14,8 +14,7 @@ setup(
     data_files=[
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*_launch.[py][yma]*'))),
-        ('lib/' + package_name + '/can_utils', ['pix_vehicle_interface/can_utils/can_receiver.py',
-                                                'pix_vehicle_interface/can_utils/can_sender.py']),
+        ('lib/' + package_name + '/can_utils', ['pix_vehicle_interface/can_utils/can_sender.py']),
 
         ('lib/' + package_name + '/pix_dataclass', ['pix_vehicle_interface/pix_dataclass/DriveCtrlData.py',
                                                     'pix_vehicle_interface/pix_dataclass/BrakeCtrlData.py',

@@ -81,6 +81,7 @@ class CANReceiverNode(Node):
                 self.msg_obj_gear_rpt.report = 2
             elif gear_status == 3:
                 self.msg_obj_gear_rpt.report = 20
+
             self.msg_obj_velocity_rpt.header.stamp = self.get_clock().now().to_msg()
             self.msg_obj_velocity_rpt.header.frame_id = "velocity_rpt"
             self.msg_obj_velocity_rpt.longitudinal_velocity = abs(float(unpack('<h', data[1:3])[0] * 0.01))

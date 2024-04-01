@@ -55,12 +55,12 @@ class TestControlNode(Node):
         msg_obj_actuation_cmd.actuation.brake_cmd = 0.0
         msg_obj_actuation_cmd.actuation.steer_cmd = 0.0
 
-        self.control_cmd_publisher.publish(msg_obj_control_cmd)
+        # self.control_cmd_publisher.publish(msg_obj_control_cmd)
         self.gear_cmd_publisher.publish(msg_obj_gear_cmd)
-        self.current_gate_mode_publisher.publish(msg_obj_current_gate_mode)
-        self.current_emergency_publisher.publish(msg_obj_emergency_cmd)
-        self.turn_indicators_cmd_publisher.publish(msg_obj_turn_indicators_cmd)
-        self.hazard_lights_cmd_publisher.publish(msg_obj_hazard_lights_cmd)
+        # self.current_gate_mode_publisher.publish(msg_obj_current_gate_mode)
+        # self.current_emergency_publisher.publish(msg_obj_emergency_cmd)
+        # self.turn_indicators_cmd_publisher.publish(msg_obj_turn_indicators_cmd)
+        # self.hazard_lights_cmd_publisher.publish(msg_obj_hazard_lights_cmd)
         # self.actuation_cmd_publisher.publish(msg_obj_actuation_cmd)
 
 

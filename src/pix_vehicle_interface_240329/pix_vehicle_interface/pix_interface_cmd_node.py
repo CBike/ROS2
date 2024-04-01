@@ -26,8 +26,8 @@ class CANCommandNode(Node):
         self.can_channel = 'can0'
         self.can_sender = CANSender(self.can_channel)
 
-        self.drive_ctrl_data = BrakeCtrlData()
-        self.brake_ctrl_data = DriveCtrlData()
+        self.drive_ctrl_data = DriveCtrlData()
+        self.brake_ctrl_data = BrakeCtrlData()
         self.steer_ctrl_data = SteerCtrlData()
         self.vehicle_ctrl_data = VehicleCtrlData()
         self.wheel_ctrl_data = WheelTorqueCtrlData()
@@ -78,6 +78,8 @@ class CANCommandNode(Node):
             self.steer_ctrl_data.update_value(**command_data)
 
         elif isinstance(msg, GearCommand):
+            gear_command = 0
+
             if msg.command == 1:
                 gear_command = 2
             elif 2 <= msg.command <= 19:
@@ -96,6 +98,7 @@ class CANCommandNode(Node):
             }
 
             self.drive_ctrl_data.update_value(**command_data)
+            self.get_logger().info(f'GearCommand, drive_ctrl_data : {self.drive_ctrl_data}')
 
         elif isinstance(msg, GateMode):
             pass
